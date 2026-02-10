@@ -1,0 +1,504 @@
+# Flutter Development AI Agent Rules
+
+## Core Principles
+
+### 0. ALWAYS USE CORE FIRST
+
+- **Check `/lib/core/` directory BEFORE creating anything new**
+- If functionality exists in core, USE IT - don't recreate it
+- If something will be used in 2+ places, PUT IT IN CORE
+- Core structure:
+  ```
+  lib/core/
+    ├── base/          # Base classes (Service, Repository, Cubit)
+    ├── widgets/       # Reusable widgets (buttons, cards, etc.)
+    ├── utils/         # Helper functions, extensions
+    ├── constants/     # Colors, strings, sizes
+    ├── theme/         # App theme configuration
+    ├── services/      # Shared services (API, storage)
+    └── models/        # Shared data models
+  ```
+- **When to add to core**: If you use it twice, it goes in core
+
+### 1. Code Organization & File Size
+
+- **Maximum 150 lines per file** - Split larger features into multiple files
+- Keep each file focused on a single responsibility
+- If a file exceeds 150 lines, refactor into smaller modules
+
+### 2. Function Simplicity
+
+- **One function = One responsibility**
+- Maximum 20-30 lines per function
+- If a function is complex, break it into smaller helper functions
+- Use descriptive function names that explain what they do
+- Avoid nested logic beyond 2-3 levels
+- **SIMPLEST WAY FIRST**: Don't over-engineer, use the most straightforward approach
+
+### 3. Simplicity Philosophy
+
+- **Always choose the simplest solution**
+- Avoid complex patterns when simple ones work
+- Don't add abstractions until you need them
+- Use Flutter's built-in widgets before custom solutions
+- If there's a simple way and a complex way → choose simple
+- Examples:
+  - ✅ Use `setState` for simple state → Don't jump to complex state management
+  - ✅ Use `Navigator.push` for navigation → Don't add routing packages unnecessarily
+  - ✅ Use built-in widgets → Don't build custom when Flutter provides it
+  - ✅ Use core utilities → Don't recreate what exists
+
+### 4. Error Handling & Testing
+
+- **Always implement error handling**:
+  - Use try-catch blocks for async operations
+  - Validate user inputs before processing
+  - Handle null cases explicitly
+  - Provide meaningful error messages
+- **Test before delivering**:
+  - Verify all functions work as expected
+  - Test edge cases (null, empty, invalid data)
+  - Ensure no compilation errors
+  - Check for runtime exceptions
+
+### 5. Reusable Components
+
+- **ALWAYS check core first** before creating new components
+- **Create reusable widgets in core** for repeated UI patterns
+- **Extract common logic to core/utils** for shared functionality
+- **Use const constructors** where possible for performance
+- **Create theme-aware widgets** that adapt to app theme
+- **Rule of 2**: If you need it twice, move it to core immediately
+- Structure:
+  - Custom buttons → `core/widgets/buttons/`
+  - Custom cards → `core/widgets/cards/`
+  - Text styles → `core/theme/`
+  - Helper functions → `core/utils/`
+  - Shared models → `core/models/`
+
+### 6. Animations
+
+- **Add subtle animations** to improve UX:
+  - Use `AnimatedContainer` for simple property changes
+  - Use `Hero` for page transitions
+  - Add `AnimatedOpacity` for fade effects
+  - Use `SlideTransition` for sliding elements
+  - Keep animations between 200-300ms for snappiness
+- **Default animations to include**:
+  - Button press feedback (scale or opacity)
+  - Page transitions
+  - List item appearance
+  - Loading states
+
+### 7. Naming Conventions
+
+- **Files**: `snake_case.dart` (e.g., `user_profile_screen.dart`)
+- **Classes**: `PascalCase` (e.g., `UserProfileScreen`)
+- **Variables/Functions**: `camelCase` (e.g., `userName`, `fetchUserData()`)
+- **Constants**: `lowerCamelCase` or `SCREAMING_SNAKE_CASE` for compile-time constants
+- **Private members**: Prefix with `_` (e.g., `_buildContent()`)
+- **Meaningful names**: Use descriptive names, avoid abbreviations unless common (id, url, api)
+
+### 8. Documentation
+
+- **Add comments ONLY when necessary** (complex logic, non-obvious behavior)
+- **Use dartdoc for public APIs**:
+  ```dart
+  /// Fetches user data from the API.
+  ///
+  /// Returns [User] on success, throws [ApiException] on failure.
+  Future<User> fetchUser(String id) async { }
+  ```
+- **Avoid obvious comments**: Don't comment what code clearly does
+- **Document WHY, not WHAT**: Explain reasoning, not mechanics
+
+## Project Architecture & Base Classes
+
+### 1. Service Layer (`BaseService`)
+
+- **Extend**: `BaseService`
+- **Usage**: Raw data fetching and parsing.
+- **Key Method**: `handleBaseModelApiRequests<T>`
+- **Pattern**:
+
+```dart
+class MyService extends BaseService {
+  MyService(ApiClient apiClient) : super(apiClient);
+
+  Future<MyResponse> getData() async {
+    // Automatically parses JSON to Model
+    // Automatically handles DioExceptions
+    final response = await apiClient.safeApiCall(
+      httpMethod: HttpMethods.get,
+      endPoint: ApiConstants.myEndpoint,
+    );
+    return MyResponse.fromJson(response.data);
+  }
+}
+```
+
+### 2. Repository Layer (`BaseRepository`)
+
+- **Extend**: `BaseRepository`
+- **Usage**: Safety guard, returns `Either<GFailure, T>`.
+- **Key Method**: `safeCall<T>`
+- **Pattern**:
+
+```dart
+class MyRepository extends BaseRepository {
+  final MyService service;
+  MyRepository(this.service);
+
+  Future<Either<GFailure, MyResponse>> getData() async {
+    // Wraps service call in try-catch for GFailure
+    return safeCall(() => service.getData());
+  }
+}
+```
+
+### 3. Cubit Layer (`BaseCubit`)
+
+- **Extend**: `BaseCubit<MyState>`
+- **Usage**: State management automation.
+- **Key Method**: `handleApiCall`
+- **Pattern**:
+
+```dart
+class MyCubit extends BaseCubit<MyState> {
+  final MyRepository repository;
+  MyCubit(this.repository) : super(MyState(apiStates: {}));
+
+  Future<void> loadData() async {
+    // Automatically emits Loading -> Success/Error for this specific endpoint
+    handleApiCall<MyResponse>(
+      endPoint: ApiConstants.myEndpoint,
+      apiCall: () => repository.getData(),
+    );
+  }
+}
+```
+
+### 4. State Management (`BaseState`)
+
+- **Usage**: Map-based state for multiple concurrent API calls.
+- **Pattern**:
+
+```dart
+// Check status in UI
+if (state.getStatus(ApiConstants.myEndpoint) == BaseStatus.loading) {
+  return LoadingWidget();
+}
+```
+
+## Code Structure Template
+
+```dart
+// 1. Imports (organized)
+import 'package:flutter/material.dart';
+// External packages
+// Internal imports
+
+// 2. Widget/Class definition
+class MyWidget extends StatelessWidget {
+  // 3. Properties (const where possible)
+  final String title;
+  const MyWidget({Key? key, required this.title}) : super(key: key);
+
+  // 4. Build method (keep simple)
+  @override
+  Widget build(BuildContext context) {
+    return _buildContent();
+  }
+
+  // 5. Helper methods (extract complexity)
+  Widget _buildContent() {
+    // Implementation
+  }
+}
+```
+
+## Specific Rules
+
+### Widget Development
+
+- Prefer `StatelessWidget` over `StatefulWidget` when possible
+- Extract complex widgets into separate files
+- Use `Builder` widgets to access context safely
+- Always add `Key` parameters for list items
+
+### Null Safety
+
+- **Use null-aware operators**: `?.`, `??`, `??=`
+- **Avoid `!` (bang operator)**: Only use when 100% certain value is non-null
+- **Prefer `?.` over manual null checks**:
+
+  ```dart
+  // ✅ Good
+  final name = user?.name ?? 'Guest';
+
+  // ❌ Avoid
+  final name = user != null ? user.name : 'Guest';
+  ```
+
+- **Use `late` sparingly**: Only when initialization is guaranteed before use
+- **Make parameters required or provide defaults**: Avoid nullable when possible
+
+### State Management
+
+- Keep state as local as possible
+- Use `setState` for simple local state
+- Document when state changes occur
+- Avoid unnecessary rebuilds
+
+### Styling
+
+- Use `Theme.of(context)` for colors and text styles
+- Create custom theme data when needed
+- Use `MediaQuery` for responsive layouts
+- Keep magic numbers as named constants
+
+### Performance
+
+- Use `const` constructors aggressively
+- Avoid rebuilding entire trees unnecessarily
+- Use `ListView.builder` for long lists
+- Cache expensive computations
+- **Dispose controllers**: Always dispose `TextEditingController`, `AnimationController`, `ScrollController`
+- **Avoid `setState` in loops**: Batch updates when possible
+- **Use `RepaintBoundary`** for complex widgets that don't change often
+
+### Memory Management
+
+- **Always dispose resources**:
+  ```dart
+  @override
+  void dispose() {
+    _controller.dispose();
+    _textController.dispose();
+    super.dispose();
+  }
+  ```
+- **Cancel subscriptions**: StreamSubscription, Timer, listeners
+- **Remove listeners**: `removeListener()` when done
+- **Close streams**: Call `.close()` on StreamController
+
+### File Naming & Organization
+
+```
+lib/
+  ├── core/            # SHARED ACROSS PROJECT
+  │   ├── base/        # Base classes
+  │   ├── models/      # Shared data models
+  │   ├── widgets/     # Reusable widgets
+  │   ├── utils/       # Helper functions, extensions
+  │   ├── constants/   # App constants (colors, strings, sizes)
+  │   ├── theme/       # Theme configuration
+  │   └── services/    # API, storage, shared services
+  ├── features/        # Feature-specific code
+  │   └── [feature]/
+  │       ├── screens/
+  │       ├── widgets/ # Feature-specific widgets only
+  │       └── models/  # Feature-specific models only
+  └── main.dart
+```
+
+**Rule**: If it's used in multiple features → core. If it's feature-specific → keep in feature.
+
+## Quality Checklist
+
+Before completing any task, verify:
+
+- [ ] **Checked core directory for existing solutions**
+- [ ] **Used core components/utilities where applicable**
+- [ ] **Added reusable items to core (if used 2+ times)**
+- [ ] No compilation errors
+- [ ] No runtime errors for common cases
+- [ ] File is under 150 lines
+- [ ] Functions are simple and focused
+- [ ] **Used the SIMPLEST approach possible**
+- [ ] Error handling is implemented
+- [ ] At least one animation added
+- [ ] Code is reusable/modular
+- [ ] Proper null safety
+- [ ] No hardcoded values (use core/constants)
+- [ ] Comments for complex logic only
+- [ ] **All controllers/resources disposed properly**
+- [ ] **Keys added to list items**
+- [ ] **Used mounted check after async operations**
+- [ ] **Responsive sizing (no hardcoded pixel values)**
+- [ ] **Followed naming conventions**
+
+## Animation Examples to Use
+
+```dart
+// Simple fade-in
+AnimatedOpacity(
+  opacity: isVisible ? 1.0 : 0.0,
+  duration: const Duration(milliseconds: 300),
+  child: child,
+)
+
+// Scale on tap
+AnimatedScale(
+  scale: isPressed ? 0.95 : 1.0,
+  duration: const Duration(milliseconds: 100),
+  child: child,
+)
+
+// Slide transition
+SlideTransition(
+  position: animation.drive(
+    Tween(begin: Offset(1, 0), end: Offset.zero),
+  ),
+  child: child,
+)
+```
+
+## Error Handling Pattern
+
+```dart
+Future<Result> fetchData() async {
+  try {
+    final data = await apiCall();
+    if (data == null) {
+      return Result.error('No data received');
+    }
+    return Result.success(data);
+  } catch (e) {
+    return Result.error('Failed to fetch: $e');
+  }
+}
+```
+
+## Common Mistakes to AVOID
+
+### ❌ Don't do this:
+
+```dart
+// 1. Building widgets in variables
+final myWidget = Container(...); // May cause rebuild issues
+
+// 2. Using context after async gap without check
+await Future.delayed(...);
+Navigator.push(context, ...); // Context might be invalid
+
+// 3. Hardcoding sizes
+Container(width: 200, height: 100) // Not responsive
+
+// 4. Not using keys in lists
+ListView(children: items.map((item) => ItemWidget(item)).toList())
+
+// 5. Forgetting to dispose
+class MyWidget extends StatefulWidget {
+  final controller = TextEditingController(); // Memory leak!
+}
+
+// 6. setState in initState
+@override
+void initState() {
+  super.initState();
+  setState(() {}); // ERROR!
+}
+```
+
+### ✅ Do this instead:
+
+```dart
+// 1. Build widgets in build methods
+Widget _buildWidget() => Container(...);
+
+// 2. Check mounted before using context
+await Future.delayed(...);
+if (!mounted) return;
+Navigator.push(context, ...);
+
+// 3. Use responsive sizing
+Container(
+  width: MediaQuery.of(context).size.width * 0.8,
+  height: 100.h, // If using responsive package
+)
+
+// 4. Always use keys for dynamic lists
+ListView(
+  children: items.map((item) =>
+    ItemWidget(key: ValueKey(item.id), item: item)
+  ).toList(),
+)
+
+// 5. Proper disposal
+class MyWidget extends StatefulWidget {
+  late final TextEditingController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+}
+
+// 6. Use post-frame callback or addPostFrameCallback
+@override
+void initState() {
+  super.initState();
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    setState(() {});
+  });
+}
+```
+
+## Remember
+
+- **Check core FIRST, always**
+- **Rule of 2: Use twice → Move to core**
+- **Simplicity > Cleverness**
+- **Readability > Brevity**
+- **Tested > Assumed Working**
+- **Reusable > One-time Use**
+- **Simple solution > Complex solution**
+- **Use core → Don't recreate**
+
+## Core Usage Examples
+
+### ❌ WRONG - Recreating existing functionality
+
+```dart
+// Creating a custom button when one exists in core
+class MyCustomButton extends StatelessWidget {
+  // ... 50 lines of code
+}
+```
+
+### ✅ CORRECT - Using core
+
+```dart
+// Using existing core button
+import 'package:myapp/core/widgets/buttons/primary_button.dart';
+
+PrimaryButton(
+  text: 'Submit',
+  onPressed: () {},
+)
+```
+
+### ❌ WRONG - Hardcoding values
+
+```dart
+Text(
+  'Hello',
+  style: TextStyle(fontSize: 16, color: Colors.blue),
+)
+```
+
+### ✅ CORRECT - Using core constants/theme
+
+```dart
+import 'package:myapp/core/theme/app_text_styles.dart';
+
+Text('Hello', style: AppTextStyles.bodyMedium)
+```
