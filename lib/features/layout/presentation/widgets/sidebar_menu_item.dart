@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:task_dashboard/core/theming/colors.dart';
 
 class SidebarMenuItem extends StatelessWidget {
-  final IconData icon;
+  final String? iconPath; // SVG path
+  final IconData? materialIcon; // Fallback Material icon
   final String label;
   final String route;
   final bool isSelected;
@@ -12,12 +14,16 @@ class SidebarMenuItem extends StatelessWidget {
 
   const SidebarMenuItem({
     super.key,
-    required this.icon,
+    this.iconPath,
+    this.materialIcon,
     required this.label,
     required this.route,
     this.isSelected = false,
     this.badgeCount,
-  });
+  }) : assert(
+         iconPath != null || materialIcon != null,
+         'Either iconPath or materialIcon must be provided',
+       );
 
   @override
   Widget build(BuildContext context) {
@@ -34,13 +40,27 @@ class SidebarMenuItem extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(
-              icon,
-              size: 20.sp,
-              color: isSelected
-                  ? ColorManager.mainColor
-                  : ColorManager.textSecondary,
-            ),
+            // Icon - SVG or Material
+            if (iconPath != null)
+              SvgPicture.asset(
+                iconPath!,
+                width: 20.w,
+                height: 20.h,
+                colorFilter: ColorFilter.mode(
+                  isSelected
+                      ? ColorManager.mainColor
+                      : ColorManager.textSecondary,
+                  BlendMode.srcIn,
+                ),
+              )
+            else if (materialIcon != null)
+              Icon(
+                materialIcon,
+                size: 20.sp,
+                color: isSelected
+                    ? ColorManager.mainColor
+                    : ColorManager.textSecondary,
+              ),
             SizedBox(width: 12.w),
             Expanded(
               child: Text(

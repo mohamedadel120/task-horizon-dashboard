@@ -67,7 +67,7 @@ class CategoriesScreen extends StatelessWidget {
             physics: const NeverScrollableScrollPhysics(),
             mainAxisSpacing: 20.h,
             crossAxisSpacing: 20.w,
-            childAspectRatio: 1.2,
+            childAspectRatio: 0.95,
             children: [
               CategoryCard(
                 imageUrl:

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:task_dashboard/core/theming/colors.dart';
 import 'package:task_dashboard/features/layout/presentation/widgets/sidebar_menu_item.dart';
@@ -28,14 +29,10 @@ class AppSidebar extends StatelessWidget {
             padding: EdgeInsets.all(20.w),
             child: Row(
               children: [
-                Container(
+                SvgPicture.asset(
+                  'assets/icons/logo.svg',
                   width: 32.w,
                   height: 32.h,
-                  decoration: BoxDecoration(
-                    color: ColorManager.mainColor,
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
-                  child: Icon(Icons.hexagon, color: Colors.white, size: 20.sp),
                 ),
                 SizedBox(width: 12.w),
                 Text(
@@ -50,34 +47,34 @@ class AppSidebar extends StatelessWidget {
             ),
           ),
           SizedBox(height: 20.h),
-          // Menu Items
+          // Menu Items with SVG icons
           SidebarMenuItem(
-            icon: Icons.dashboard_outlined,
+            iconPath: 'assets/icons/dashboard_icon.svg',
             label: 'Dashboard',
             route: '/dashboard',
             isSelected: currentRoute == '/dashboard',
           ),
           SidebarMenuItem(
-            icon: Icons.inventory_2_outlined,
+            iconPath: 'assets/icons/product_icon.svg',
             label: 'Products',
             route: '/products',
             isSelected: currentRoute.startsWith('/products'),
           ),
           SidebarMenuItem(
-            icon: Icons.category_outlined,
+            iconPath: 'assets/icons/categories_icon.svg',
             label: 'Categories',
             route: '/categories',
             isSelected: currentRoute.startsWith('/categories'),
           ),
           SidebarMenuItem(
-            icon: Icons.shopping_cart_outlined,
+            iconPath: 'assets/icons/order_icon.svg',
             label: 'Orders',
             route: '/orders',
             badgeCount: 4,
             isSelected: currentRoute == '/orders',
           ),
           SidebarMenuItem(
-            icon: Icons.people_outline,
+            iconPath: 'assets/icons/customer_icon.svg',
             label: 'Customers',
             route: '/customers',
             isSelected: currentRoute == '/customers',
@@ -104,13 +101,13 @@ class AppSidebar extends StatelessWidget {
             ),
           ),
           SidebarMenuItem(
-            icon: Icons.settings_outlined,
+            iconPath: 'assets/icons/general_icon.svg',
             label: 'General',
             route: '/settings/general',
             isSelected: currentRoute == '/settings/general',
           ),
           SidebarMenuItem(
-            icon: Icons.security_outlined,
+            iconPath: 'assets/icons/security_icon.svg',
             label: 'Security',
             route: '/settings/security',
             isSelected: currentRoute == '/settings/security',
