@@ -56,6 +56,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
         if (addStatus == BaseStatus.success ||
             updateStatus == BaseStatus.success) {
+          final cubit = context.read<ProductsCubit>();
+          cubit.clearOperationStatuses(['add_product', 'update_product']);
           final isEditing = widget.productId != null;
           AppSnackBar.showSuccess(
             context,
@@ -63,8 +65,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 ? 'Product updated successfully!'
                 : 'Product created successfully!',
           );
-          context.read<ProductsCubit>().resetForm();
-          context.go('/products');
+          cubit.resetForm();
+          if (context.mounted) context.go('/products');
         } else if (addStatus == BaseStatus.error ||
             updateStatus == BaseStatus.error) {
           AppSnackBar.showError(

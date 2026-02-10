@@ -1,4 +1,4 @@
-﻿import 'dart:developer';
+import 'dart:developer';
 
 import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -89,5 +89,20 @@ abstract class BaseCubit<S extends BaseState> extends Cubit<S> {
           )
           as S,
     );
+  }
+
+  /// Clears operation status so listeners don't re-trigger on success/error.
+  /// Call this when handling success (e.g. before navigation) to avoid re-entry.
+  void clearOperationStatuses(List<String> operations) {
+    if (operations.isEmpty) return;
+    final newApiStates = Map<String, BaseApiState>.from(state.apiStates);
+    for (final op in operations) {
+      newApiStates[op] = BaseApiState(
+        status: BaseStatus.initial,
+        error: null,
+        responseModel: null,
+      );
+    }
+    emit(state.copyWith(apiStates: newApiStates) as S);
   }
 }
