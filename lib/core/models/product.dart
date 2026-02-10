@@ -3,7 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 enum ProductStatus {
   active,
   outOfStock,
-  discontinued;
+  discontinued,
+  draft;
 
   String get displayName {
     switch (this) {
@@ -13,6 +14,8 @@ enum ProductStatus {
         return 'Out of Stock';
       case ProductStatus.discontinued:
         return 'Discontinued';
+      case ProductStatus.draft:
+        return 'Draft';
     }
   }
 }
@@ -27,6 +30,9 @@ class Product {
   final String categoryId;
   final String? categoryName;
   final String? imageUrl;
+  final double? comparePrice;
+  final List<String>? tags;
+  final String? productType;
   final ProductStatus status;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -41,6 +47,9 @@ class Product {
     required this.categoryId,
     this.categoryName,
     this.imageUrl,
+    this.comparePrice,
+    this.tags,
+    this.productType,
     required this.status,
     required this.createdAt,
     required this.updatedAt,
@@ -57,6 +66,9 @@ class Product {
       'categoryId': categoryId,
       'categoryName': categoryName,
       'imageUrl': imageUrl,
+      'comparePrice': comparePrice,
+      'tags': tags,
+      'productType': productType,
       'status': status.name,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
@@ -76,6 +88,9 @@ class Product {
       categoryId: data['categoryId'] ?? '',
       categoryName: data['categoryName'],
       imageUrl: data['imageUrl'],
+      comparePrice: (data['comparePrice'] ?? 0).toDouble(),
+      tags: (data['tags'] as List<dynamic>?)?.map((e) => e.toString()).toList(),
+      productType: data['productType'],
       status: ProductStatus.values.firstWhere(
         (e) => e.name == data['status'],
         orElse: () => ProductStatus.active,
@@ -97,6 +112,9 @@ class Product {
       categoryId: json['categoryId'] ?? '',
       categoryName: json['categoryName'],
       imageUrl: json['imageUrl'],
+      comparePrice: (json['comparePrice'] ?? 0).toDouble(),
+      tags: (json['tags'] as List<dynamic>?)?.map((e) => e.toString()).toList(),
+      productType: json['productType'],
       status: json['status'] is String
           ? ProductStatus.values.firstWhere(
               (e) => e.name == json['status'],
@@ -123,6 +141,9 @@ class Product {
     String? categoryId,
     String? categoryName,
     String? imageUrl,
+    double? comparePrice,
+    List<String>? tags,
+    String? productType,
     ProductStatus? status,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -137,6 +158,9 @@ class Product {
       categoryId: categoryId ?? this.categoryId,
       categoryName: categoryName ?? this.categoryName,
       imageUrl: imageUrl ?? this.imageUrl,
+      comparePrice: comparePrice ?? this.comparePrice,
+      tags: tags ?? this.tags,
+      productType: productType ?? this.productType,
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

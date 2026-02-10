@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:task_dashboard/core/base/cubit/base_state.dart';
 import 'package:task_dashboard/core/models/product.dart';
 import 'package:task_dashboard/core/theming/colors.dart';
@@ -307,7 +308,7 @@ class ProductDataTable extends StatelessWidget {
                   icon: Icon(Icons.edit_outlined, size: 18.sp),
                   color: ColorManager.textSecondary,
                   onPressed: () {
-                    // TODO: Navigate to edit screen
+                    context.go('/products/edit/${product.id}', extra: product);
                   },
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),

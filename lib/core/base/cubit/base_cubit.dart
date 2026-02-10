@@ -13,12 +13,30 @@ abstract class BaseCubit<S extends BaseState> extends Cubit<S> {
     required Future<Either<GFailure, T>> Function() apiCall,
   }) async {
     log('endPoint: $endPoint');
-    startOperation(endPoint);
-    final result = await apiCall();
-    result.fold(
-      (failure) => failOperation(endPoint, failure.message),
-      (data) => successOperation(endPoint, data: data),
-    );
+    try {
+      startOperation(endPoint);
+      log('handleApiCall: calling apiCall for $endPoint');
+      final result = await apiCall();
+      log('handleApiCall: apiCall completed for $endPoint, folding result');
+      result.fold(
+        (failure) {
+          log('handleApiCall: FAILURE for $endPoint: ${failure.message}');
+          failOperation(endPoint, failure.message);
+        },
+        (data) {
+          log('handleApiCall: SUCCESS for $endPoint, data: $data');
+          successOperation(endPoint, data: data);
+        },
+      );
+    } catch (e, stackTrace) {
+      log('handleApiCall: EXCEPTION for $endPoint: $e');
+      log('handleApiCall: STACK: $stackTrace');
+      try {
+        failOperation(endPoint, e.toString());
+      } catch (_) {
+        log('handleApiCall: Even failOperation threw!');
+      }
+    }
   }
 
   void startOperation(String operation) {

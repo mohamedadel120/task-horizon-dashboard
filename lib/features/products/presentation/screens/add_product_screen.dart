@@ -3,253 +3,240 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:task_dashboard/core/base/cubit/base_state.dart';
+import 'package:task_dashboard/core/models/product.dart';
 import 'package:task_dashboard/core/theming/colors.dart';
-import 'package:task_dashboard/core/widgets/dashboard_text_field.dart';
 import 'package:task_dashboard/core/widgets/app_snackbar.dart';
 import 'package:task_dashboard/features/products/presentation/cubit/products_cubit.dart';
 import 'package:task_dashboard/features/products/presentation/cubit/products_state.dart';
-import 'package:task_dashboard/features/products/presentation/widgets/category_dropdown.dart';
+import 'package:task_dashboard/features/products/presentation/widgets/add_product/general_info_card.dart';
+import 'package:task_dashboard/features/products/presentation/widgets/add_product/media_card.dart';
+import 'package:task_dashboard/features/products/presentation/widgets/add_product/organization_card.dart';
+import 'package:task_dashboard/features/products/presentation/widgets/add_product/pricing_inventory_card.dart';
+import 'package:task_dashboard/features/products/presentation/widgets/add_product/product_status_card.dart';
 
-class AddProductScreen extends StatelessWidget {
-  const AddProductScreen({super.key});
+class AddProductScreen extends StatefulWidget {
+  final String? productId;
+  final Product? product;
+
+  const AddProductScreen({super.key, this.productId, this.product});
+
+  @override
+  State<AddProductScreen> createState() => _AddProductScreenState();
+}
+
+class _AddProductScreenState extends State<AddProductScreen> {
+  @override
+  void initState() {
+    super.initState();
+    final cubit = context.read<ProductsCubit>();
+    if (widget.product != null) {
+      cubit.initializeForm(widget.product);
+    } else if (widget.productId != null) {
+      // Fallback: Fetch product by ID (deep link or refresh)
+      final product = cubit.getProductById(widget.productId!);
+      if (product != null) {
+        cubit.initializeForm(product);
+      } else {
+        cubit.fetchProductById(widget.productId!);
+      }
+    } else {
+      cubit.initializeForm(null);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final cubit = context.read<ProductsCubit>();
+    // Check if screen is large enough for 2-column layout
+    final isDesktop = MediaQuery.of(context).size.width > 900;
 
     return BlocListener<ProductsCubit, ProductsState>(
       listener: (context, state) {
         final addStatus = state.getStatus('add_product');
+        final updateStatus = state.getStatus('update_product');
 
-        if (addStatus == BaseStatus.success) {
-          AppSnackBar.showSuccess(context, 'Product created successfully!');
-          cubit.clearForm();
+        if (addStatus == BaseStatus.success ||
+            updateStatus == BaseStatus.success) {
+          final isEditing = widget.productId != null;
+          AppSnackBar.showSuccess(
+            context,
+            isEditing
+                ? 'Product updated successfully!'
+                : 'Product created successfully!',
+          );
+          context.read<ProductsCubit>().resetForm();
           context.go('/products');
-        } else if (addStatus == BaseStatus.error) {
+        } else if (addStatus == BaseStatus.error ||
+            updateStatus == BaseStatus.error) {
           AppSnackBar.showError(
             context,
-            state.getError('add_product') ?? 'Failed to create product',
+            state.getError('add_product') ??
+                state.getError('update_product') ??
+                (widget.productId != null
+                    ? 'Failed to update product'
+                    : 'Failed to create product'),
           );
         }
       },
-      child: BlocBuilder<ProductsCubit, ProductsState>(
-        buildWhen: (previous, current) =>
-            previous.getStatus('add_product') !=
-            current.getStatus('add_product'),
-        builder: (context, state) {
-          final isLoading =
-              state.getStatus('add_product') == BaseStatus.loading;
-
-          return SingleChildScrollView(
-            padding: EdgeInsets.all(24.w),
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF9FAFB), // Light grey background
+        body: SingleChildScrollView(
+          padding: EdgeInsets.all(24.w),
+          child: Form(
+            key: context.read<ProductsCubit>().formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header
-                Text(
-                  'Add Product',
-                  style: TextStyle(
-                    fontSize: 28.sp,
-                    fontWeight: FontWeight.bold,
-                    color: ColorManager.black,
-                  ),
-                ),
-                SizedBox(height: 4.h),
-                Text(
-                  'Add a new product to your inventory catalog.',
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    color: ColorManager.textSecondary,
-                  ),
-                ),
+                _buildHeader(context),
                 SizedBox(height: 32.h),
-                // Form in single container
-                Container(
-                  constraints: BoxConstraints(maxWidth: 800.w),
-                  padding: EdgeInsets.all(32.w),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(color: ColorManager.grey300),
-                  ),
-                  child: Form(
-                    key: cubit.formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        DashboardTextField(
-                          label: 'Product Name',
-                          hint: 'e.g. Wireless Headphones Pro',
-                          controller: cubit.nameController,
-                          required: true,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Product name is required';
-                            }
-                            if (value.trim().length < 2) {
-                              return 'Product name must be at least 2 characters';
-                            }
-                            return null;
-                          },
-                        ),
-                        SizedBox(height: 20.h),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: DashboardTextField(
-                                label: 'SKU',
-                                hint: 'e.g. PROD-001',
-                                controller: cubit.skuController,
-                                required: true,
-                                validator: (value) {
-                                  if (value == null || value.trim().isEmpty) {
-                                    return 'SKU is required';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                            SizedBox(width: 16.w),
-                            Expanded(child: const CategoryDropdown()),
-                          ],
-                        ),
-                        SizedBox(height: 20.h),
-                        DashboardTextField(
-                          label: 'Description',
-                          hint: 'Describe the product features...',
-                          controller: cubit.descriptionController,
-                          maxLines: 4,
-                        ),
-                        SizedBox(height: 20.h),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: DashboardTextField(
-                                label: 'Price',
-                                hint: '0.00',
-                                controller: cubit.priceController,
-                                required: true,
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                      decimal: true,
-                                    ),
-                                validator: (value) {
-                                  if (value == null || value.trim().isEmpty) {
-                                    return 'Price is required';
-                                  }
-                                  final price = double.tryParse(value);
-                                  if (price == null) {
-                                    return 'Enter a valid number';
-                                  }
-                                  if (price <= 0) {
-                                    return 'Price must be greater than 0';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                            SizedBox(width: 16.w),
-                            Expanded(
-                              child: DashboardTextField(
-                                label: 'Stock Quantity',
-                                hint: '0',
-                                controller: cubit.stockController,
-                                required: true,
-                                keyboardType: TextInputType.number,
-                                validator: (value) {
-                                  if (value == null || value.trim().isEmpty) {
-                                    return 'Stock quantity is required';
-                                  }
-                                  final stock = int.tryParse(value);
-                                  if (stock == null) {
-                                    return 'Enter a valid number';
-                                  }
-                                  if (stock < 0) {
-                                    return 'Stock cannot be negative';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 20.h),
-                        DashboardTextField(
-                          label: 'Product Image URL',
-                          hint: 'https://example.com/image.jpg',
-                          helperText:
-                              'Paste a direct link to an image (JPG, PNG, WebP).',
-                          controller: cubit.imageUrlController,
-                        ),
-                        SizedBox(height: 32.h),
-                        // Actions
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            OutlinedButton(
-                              onPressed: isLoading
-                                  ? null
-                                  : () => context.go('/products'),
-                              style: OutlinedButton.styleFrom(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 24.w,
-                                  vertical: 14.h,
-                                ),
-                                side: const BorderSide(
-                                  color: ColorManager.grey300,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8.r),
-                                ),
-                              ),
-                              child: const Text('Cancel'),
-                            ),
-                            SizedBox(width: 12.w),
-                            ElevatedButton(
-                              onPressed: isLoading
-                                  ? null
-                                  : () async {
-                                      final error = await cubit.submitProduct();
-                                      if (error != null && context.mounted) {
-                                        AppSnackBar.showError(context, error);
-                                      }
-                                    },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: ColorManager.mainColor,
-                                foregroundColor: Colors.white,
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 24.w,
-                                  vertical: 14.h,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8.r),
-                                ),
-                              ),
-                              child: isLoading
-                                  ? SizedBox(
-                                      width: 20.w,
-                                      height: 20.h,
-                                      child: const CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                              Colors.white,
-                                            ),
-                                      ),
-                                    )
-                                  : const Text('Create Product'),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                if (isDesktop) _buildDesktopLayout() else _buildMobileLayout(),
               ],
             ),
-          );
-        },
+          ),
+        ),
       ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return BlocBuilder<ProductsCubit, ProductsState>(
+      buildWhen: (previous, current) =>
+          previous.getStatus('add_product') !=
+              current.getStatus('add_product') ||
+          previous.getStatus('update_product') !=
+              current.getStatus('update_product'),
+      builder: (context, state) {
+        final isLoading =
+            state.getStatus('add_product') == BaseStatus.loading ||
+            state.getStatus('update_product') == BaseStatus.loading;
+
+        return Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.productId != null
+                        ? 'Edit Product'
+                        : 'Add New Product',
+                    style: TextStyle(
+                      fontSize: 28.sp,
+                      fontWeight: FontWeight.bold,
+                      color: ColorManager.black,
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    widget.productId != null
+                        ? 'Update the product details.'
+                        : 'Add a new product to your inventory catalog.',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      color: ColorManager.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            OutlinedButton(
+              onPressed: isLoading ? null : () => context.go('/products'),
+              style: OutlinedButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
+                side: const BorderSide(color: ColorManager.grey300),
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+              ),
+              child: const Text('Discard'),
+            ),
+            SizedBox(width: 12.w),
+            ElevatedButton(
+              onPressed: isLoading
+                  ? null
+                  : () async {
+                      final error = await context
+                          .read<ProductsCubit>()
+                          .saveProduct();
+                      if (error != null && context.mounted) {
+                        AppSnackBar.showError(context, error);
+                      }
+                    },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ColorManager.mainColor,
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+              ),
+              child: isLoading
+                  ? SizedBox(
+                      width: 20.w,
+                      height: 20.h,
+                      child: const CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : Text(
+                      widget.productId != null
+                          ? 'Save Changes'
+                          : 'Create Product',
+                    ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildDesktopLayout() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Left Column (Main Content) - Flex 2
+        Expanded(
+          flex: 2,
+          child: Column(
+            children: [
+              const GeneralInfoCard(),
+              SizedBox(height: 24.h),
+              const MediaCard(),
+              SizedBox(height: 24.h),
+              const PricingInventoryCard(),
+            ],
+          ),
+        ),
+        SizedBox(width: 24.w),
+        // Right Column (Side Content) - Flex 1
+        Expanded(
+          flex: 1,
+          child: Column(
+            children: [
+              const ProductStatusCard(),
+              SizedBox(height: 24.h),
+              const OrganizationCard(),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMobileLayout() {
+    return Column(
+      children: [
+        const ProductStatusCard(),
+        SizedBox(height: 24.h),
+        const GeneralInfoCard(),
+        SizedBox(height: 24.h),
+        const MediaCard(),
+        SizedBox(height: 24.h),
+        const PricingInventoryCard(),
+        SizedBox(height: 24.h),
+        const OrganizationCard(),
+      ],
     );
   }
 }
