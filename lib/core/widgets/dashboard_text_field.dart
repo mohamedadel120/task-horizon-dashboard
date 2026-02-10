@@ -10,6 +10,8 @@ class DashboardTextField extends StatelessWidget {
   final int maxLines;
   final Widget? suffix;
   final bool required;
+  final String? Function(String?)? validator;
+  final TextInputType? keyboardType;
 
   const DashboardTextField({
     super.key,
@@ -20,6 +22,8 @@ class DashboardTextField extends StatelessWidget {
     this.maxLines = 1,
     this.suffix,
     this.required = false,
+    this.validator,
+    this.keyboardType,
   });
 
   @override
@@ -33,7 +37,7 @@ class DashboardTextField extends StatelessWidget {
             style: TextStyle(
               fontSize: 14.sp,
               fontWeight: FontWeight.w600,
-              color: ColorManager.textPrimary,
+              color: ColorManager.black,
             ),
             children: required
                 ? [
@@ -46,15 +50,14 @@ class DashboardTextField extends StatelessWidget {
           ),
         ),
         SizedBox(height: 8.h),
-        TextField(
+        TextFormField(
           controller: controller,
           maxLines: maxLines,
+          keyboardType: keyboardType,
+          validator: validator,
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(
-              fontSize: 14.sp,
-              color: ColorManager.textTertiary,
-            ),
+            hintStyle: TextStyle(fontSize: 14.sp, color: ColorManager.black),
             suffixIcon: suffix,
             filled: true,
             fillColor: Colors.white,
@@ -77,13 +80,21 @@ class DashboardTextField extends StatelessWidget {
                 width: 2,
               ),
             ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8.r),
+              borderSide: const BorderSide(color: ColorManager.error, width: 1),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8.r),
+              borderSide: const BorderSide(color: ColorManager.error, width: 2),
+            ),
           ),
         ),
         if (helperText != null) ...[
           SizedBox(height: 4.h),
           Text(
             helperText!,
-            style: TextStyle(fontSize: 12.sp, color: ColorManager.textTertiary),
+            style: TextStyle(fontSize: 12.sp, color: ColorManager.black),
           ),
         ],
       ],

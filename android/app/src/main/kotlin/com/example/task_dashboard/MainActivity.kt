@@ -1,4 +1,4 @@
-package com.example.task_dashboard
+package com.horizon.task_dashboard
 
 import io.flutter.embedding.android.FlutterActivity
 

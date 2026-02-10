@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "284225918938",
+    "project_id": "task-60403",
+    "storage_bucket": "task-60403.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:284225918938:android:a47b9719b6d965bc48d2e3",
+        "android_client_info": {
+          "package_name": "com.horizon.task_dashboard"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDiuCWHwdQ973VCjBTHXgPN8PTyaROESpU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -11,15 +11,15 @@ class AppTheme {
         primary: ColorManager.mainColor,
         surface: ColorManager.white,
       ),
-      scaffoldBackgroundColor: ColorManager.bgLight,
+      scaffoldBackgroundColor: ColorManager.white,
       textTheme: GoogleFonts.interTextTheme(),
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: ColorManager.white,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
-        iconTheme: IconThemeData(color: ColorManager.textPrimary),
+        iconTheme: IconThemeData(color: ColorManager.black),
         titleTextStyle: TextStyle(
-          color: ColorManager.textPrimary,
+          color: ColorManager.black,
           fontSize: 18,
           fontWeight: FontWeight.w600,
         ),
