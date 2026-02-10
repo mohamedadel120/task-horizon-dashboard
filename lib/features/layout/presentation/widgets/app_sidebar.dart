@@ -16,11 +16,18 @@ class AppSidebar extends StatelessWidget {
     return Container(
       width: 240.w,
       height: double.infinity,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: ColorManager.white,
-        border: Border(
+        border: const Border(
           right: BorderSide(color: ColorManager.grey300, width: 1),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(-2, 0),
+          ),
+        ],
       ),
       child: Column(
         children: [

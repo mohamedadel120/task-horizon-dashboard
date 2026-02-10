@@ -4,6 +4,7 @@ class AddProductRequest {
   final String name;
   final String sku;
   final String categoryId;
+  final String? categoryName;
   final String? description;
   final double price;
   final int stock;
@@ -17,6 +18,7 @@ class AddProductRequest {
     required this.name,
     required this.sku,
     required this.categoryId,
+    this.categoryName,
     this.description,
     required this.price,
     required this.stock,

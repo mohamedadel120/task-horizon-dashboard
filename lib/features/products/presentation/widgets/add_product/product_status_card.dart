@@ -30,7 +30,7 @@ class ProductStatusCard extends StatelessWidget {
                 value: ProductStatus.active,
                 groupValue: currentStatus,
                 onChanged: (value) => cubit.setStatus(value!),
-                activeColor: ColorManager.success,
+                activeColor: ColorManager.mainColor,
               ),
               SizedBox(height: 12.h),
               _buildRadioOption(

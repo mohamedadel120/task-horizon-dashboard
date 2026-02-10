@@ -71,8 +71,8 @@ class PricingInventoryCard extends StatelessWidget {
               SizedBox(width: 16.w),
               Expanded(
                 child: DashboardTextField(
-                  label: 'SKU',
-                  hint: 'e.g. PROD-001',
+                  label: 'SKU (Stock Keeping Unit)',
+                  hint: 'e.g. HEAD-001',
                   controller: cubit.skuController,
                   required: true,
                   validator: (value) {

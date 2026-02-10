@@ -67,6 +67,7 @@ class ProductsCubit extends BaseCubit<ProductsState> {
       name: request.name,
       sku: request.sku,
       categoryId: request.categoryId,
+      categoryName: request.categoryName,
       description: request.description,
       price: request.price,
       stock: request.stock,
@@ -168,9 +169,12 @@ class ProductsCubit extends BaseCubit<ProductsState> {
     }
   }
 
-  /// Set selected category for form
-  void setCategory(String? categoryId) {
-    emit(state.copyWith(selectedCategoryId: categoryId));
+  /// Set selected category for form (id and name so product displays name in table)
+  void setCategory(String? categoryId, [String? categoryName]) {
+    emit(state.copyWith(
+      selectedCategoryId: categoryId,
+      selectedCategoryName: categoryName,
+    ));
   }
 
   /// Set product status
@@ -204,8 +208,11 @@ class ProductsCubit extends BaseCubit<ProductsState> {
 
     _selectedStatus = product.status;
 
-    // Set category in state
-    emit(state.copyWith(selectedCategoryId: product.categoryId));
+    // Set category in state (id and name for display when saving)
+    emit(state.copyWith(
+      selectedCategoryId: product.categoryId,
+      selectedCategoryName: product.categoryName,
+    ));
   }
 
   /// Submit product form with validation (Add or Update)
@@ -237,6 +244,7 @@ class ProductsCubit extends BaseCubit<ProductsState> {
           name: nameController.text.trim(),
           sku: skuController.text.trim(),
           categoryId: state.selectedCategoryId!,
+          categoryName: state.selectedCategoryName,
           description: descriptionController.text.trim().isEmpty
               ? null
               : descriptionController.text.trim(),
@@ -270,6 +278,7 @@ class ProductsCubit extends BaseCubit<ProductsState> {
           name: nameController.text.trim(),
           sku: skuController.text.trim(),
           categoryId: state.selectedCategoryId!,
+          categoryName: state.selectedCategoryName,
           description: descriptionController.text.trim().isEmpty
               ? null
               : descriptionController.text.trim(),
@@ -317,7 +326,10 @@ class ProductsCubit extends BaseCubit<ProductsState> {
     productTypeController.clear();
     _selectedStatus = ProductStatus.active;
     _editingProductId = null;
-    emit(state.copyWith(selectedCategoryId: null)); // Reset category selection
+    emit(state.copyWith(
+      selectedCategoryId: null,
+      selectedCategoryName: null,
+    ));
   }
 
   /// Reset form to initial state

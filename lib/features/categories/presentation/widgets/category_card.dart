@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:task_dashboard/core/theming/colors.dart';
 
 class CategoryCard extends StatelessWidget {
@@ -120,13 +121,25 @@ class CategoryCard extends StatelessWidget {
                       constraints: const BoxConstraints(),
                     ),
                     SizedBox(width: 12.w),
-                    IconButton(
-                      icon: Icon(Icons.delete_outline, size: 18.sp),
-                      color: ColorManager.error,
-                      onPressed: onDelete,
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
+                    GestureDetector(
+                      onTap: onDelete,
+                      child: SvgPicture.asset(
+                        'assets/icons/delete_icon.svg',
+                        width: 33.w,
+                        height: 33.h,
+                        colorFilter: ColorFilter.mode(
+                          ColorManager.error,
+                          BlendMode.srcIn,
+                        ),
+                      ),
                     ),
+                    // IconButton(
+                    //   icon: Icon(Icons.delete, size: 18.sp),
+                    //   color: ColorManager.error,
+                    //   onPressed: onDelete,
+                    //   padding: EdgeInsets.zero,
+                    //   constraints: const BoxConstraints(),
+                    // ),
                   ],
                 ),
               ],

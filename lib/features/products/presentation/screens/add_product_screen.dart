@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:task_dashboard/core/base/cubit/base_state.dart';
 import 'package:task_dashboard/core/models/product.dart';
@@ -11,6 +12,7 @@ import 'package:task_dashboard/features/products/presentation/cubit/products_sta
 import 'package:task_dashboard/features/products/presentation/widgets/add_product/general_info_card.dart';
 import 'package:task_dashboard/features/products/presentation/widgets/add_product/media_card.dart';
 import 'package:task_dashboard/features/products/presentation/widgets/add_product/organization_card.dart';
+import 'package:task_dashboard/features/products/presentation/widgets/add_product/preview_card.dart';
 import 'package:task_dashboard/features/products/presentation/widgets/add_product/pricing_inventory_card.dart';
 import 'package:task_dashboard/features/products/presentation/widgets/add_product/product_status_card.dart';
 
@@ -181,10 +183,21 @@ class _AddProductScreenState extends State<AddProductScreen> {
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     )
-                  : Text(
-                      widget.productId != null
-                          ? 'Save Changes'
-                          : 'Create Product',
+                  : Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SvgPicture.asset(
+                          'assets/icons/save_icon.svg',
+                          width: 20.w,
+                          height: 20.h,
+                          colorFilter: const ColorFilter.mode(
+                            Colors.white,
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                        SizedBox(width: 8.w),
+                        const Text('Save Product'),
+                      ],
                     ),
             ),
           ],
@@ -219,6 +232,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
               const ProductStatusCard(),
               SizedBox(height: 24.h),
               const OrganizationCard(),
+              SizedBox(height: 24.h),
+              const PreviewCard(),
             ],
           ),
         ),
@@ -238,6 +253,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
         const PricingInventoryCard(),
         SizedBox(height: 24.h),
         const OrganizationCard(),
+        SizedBox(height: 24.h),
+        const PreviewCard(),
       ],
     );
   }
