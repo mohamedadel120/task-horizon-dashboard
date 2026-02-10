@@ -86,25 +86,19 @@ class StatCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 28.sp,
               fontWeight: FontWeight.bold,
-              color: ColorManager.textPrimary,
+              color: ColorManager.black,
             ),
           ),
           SizedBox(height: 4.h),
           Text(
             title,
-            style: TextStyle(
-              fontSize: 14.sp,
-              color: ColorManager.textSecondary,
-            ),
+            style: TextStyle(fontSize: 14.sp, color: ColorManager.black),
           ),
           if (subtitle != null) ...[
             SizedBox(height: 4.h),
             Text(
               subtitle!,
-              style: TextStyle(
-                fontSize: 12.sp,
-                color: ColorManager.textTertiary,
-              ),
+              style: TextStyle(fontSize: 12.sp, color: ColorManager.black),
             ),
           ],
         ],
