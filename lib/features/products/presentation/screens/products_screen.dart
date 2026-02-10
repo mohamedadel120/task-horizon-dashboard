@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:task_dashboard/core/models/product.dart';
+import 'package:intl/intl.dart';
 import 'package:task_dashboard/core/theming/colors.dart';
 import 'package:task_dashboard/core/widgets/stat_card.dart';
 import 'package:task_dashboard/features/products/presentation/cubit/products_cubit.dart';
@@ -32,16 +32,15 @@ class ProductsScreen extends StatelessWidget {
         builder: (context, state) {
           final products = state.products;
 
-          // Calculate stats
+          // Calculate stats (order matches Figma: Total, Out of Stock, Total Value, Categories)
           final totalProducts = products.length;
-          final activeProducts = products
-              .where((p) => p.status == ProductStatus.active && p.stock > 0)
-              .length;
           final outOfStock = products.where((p) => p.stock <= 0).length;
           final totalValue = products.fold<double>(
             0,
             (sum, product) => sum + (product.price * product.stock),
           );
+          final categoryCount =
+              products.map((p) => p.categoryId).toSet().length;
 
           return SingleChildScrollView(
             padding: EdgeInsets.all(24.w),
@@ -65,7 +64,7 @@ class ProductsScreen extends StatelessWidget {
                           ),
                           SizedBox(height: 4.h),
                           Text(
-                            'Manage your product inventory and pricing.',
+                            'Manage your product catalog, inventory, and pricing.',
                             style: TextStyle(
                               fontSize: 14.sp,
                               color: ColorManager.textSecondary,
@@ -93,46 +92,72 @@ class ProductsScreen extends StatelessWidget {
                   ],
                 ),
                 SizedBox(height: 24.h),
-                // Stats Row
-                Row(
-                  children: [
-                    Expanded(
-                      child: StatCard(
+                // Stats Row (responsive)
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isNarrow = constraints.maxWidth < 700;
+                    final stats = [
+                      StatCard(
                         title: 'Total Products',
                         value: '$totalProducts',
-                        icon: Icons.inventory_2_outlined,
+                        iconPath: 'assets/icons/product_icon.svg',
                         iconColor: ColorManager.mainColor,
                       ),
-                    ),
-                    SizedBox(width: 20.w),
-                    Expanded(
-                      child: StatCard(
-                        title: 'Active Products',
-                        value: '$activeProducts',
-                        icon: Icons.check_circle_outline,
-                        iconColor: ColorManager.success,
-                      ),
-                    ),
-                    SizedBox(width: 20.w),
-                    Expanded(
-                      child: StatCard(
+                      StatCard(
                         title: 'Out of Stock',
                         value: '$outOfStock',
                         icon: Icons.warning_amber_outlined,
                         iconColor: ColorManager.warning,
-                        subtitle: outOfStock > 0 ? 'Need restocking' : null,
+                        valueColor: outOfStock > 0
+                            ? ColorManager.error
+                            : ColorManager.black,
                       ),
-                    ),
-                    SizedBox(width: 20.w),
-                    Expanded(
-                      child: StatCard(
+                      StatCard(
                         title: 'Total Value',
-                        value: '\$${(totalValue / 1000).toStringAsFixed(1)}K',
+                        value: NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 0).format(totalValue),
                         icon: Icons.attach_money,
                         iconColor: ColorManager.success,
                       ),
-                    ),
-                  ],
+                      StatCard(
+                        title: 'Categories',
+                        value: '$categoryCount',
+                        iconPath: 'assets/icons/categories_icon.svg',
+                        iconColor: ColorManager.mainColor,
+                      ),
+                    ];
+                    if (isNarrow) {
+                      return Column(
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(child: stats[0]),
+                              SizedBox(width: 12.w),
+                              Expanded(child: stats[1]),
+                            ],
+                          ),
+                          SizedBox(height: 12.h),
+                          Row(
+                            children: [
+                              Expanded(child: stats[2]),
+                              SizedBox(width: 12.w),
+                              Expanded(child: stats[3]),
+                            ],
+                          ),
+                        ],
+                      );
+                    }
+                    return Row(
+                      children: [
+                        Expanded(child: stats[0]),
+                        SizedBox(width: 20.w),
+                        Expanded(child: stats[1]),
+                        SizedBox(width: 20.w),
+                        Expanded(child: stats[2]),
+                        SizedBox(width: 20.w),
+                        Expanded(child: stats[3]),
+                      ],
+                    );
+                  },
                 ),
                 SizedBox(height: 24.h),
                 // Filters and Search

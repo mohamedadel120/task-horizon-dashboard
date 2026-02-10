@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:task_dashboard/core/theming/colors.dart';
 
 class StatCard extends StatelessWidget {
   final String title;
   final String value;
-  final IconData icon;
+  final IconData? icon;
+  final String? iconPath;
   final Color iconColor;
+  final Color? valueColor;
   final String? subtitle;
   final String? trend;
   final bool trendUp;
@@ -15,21 +18,31 @@ class StatCard extends StatelessWidget {
     super.key,
     required this.title,
     required this.value,
-    required this.icon,
+    this.icon,
+    this.iconPath,
     required this.iconColor,
+    this.valueColor,
     this.subtitle,
     this.trend,
     this.trendUp = true,
-  });
+  }) : assert(icon != null || iconPath != null,
+            'Either icon or iconPath must be provided');
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: ColorManager.white,
         borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: ColorManager.grey300),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -42,7 +55,17 @@ class StatCard extends StatelessWidget {
                   color: iconColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8.r),
                 ),
-                child: Icon(icon, size: 20.sp, color: iconColor),
+                child: iconPath != null
+                    ? SvgPicture.asset(
+                        iconPath!,
+                        width: 20.w,
+                        height: 20.h,
+                        colorFilter: ColorFilter.mode(
+                          iconColor,
+                          BlendMode.srcIn,
+                        ),
+                      )
+                    : Icon(icon!, size: 20.sp, color: iconColor),
               ),
               const Spacer(),
               if (trend != null)
@@ -86,19 +109,25 @@ class StatCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 28.sp,
               fontWeight: FontWeight.bold,
-              color: ColorManager.black,
+              color: valueColor ?? ColorManager.black,
             ),
           ),
           SizedBox(height: 4.h),
           Text(
             title,
-            style: TextStyle(fontSize: 14.sp, color: ColorManager.black),
+            style: TextStyle(
+              fontSize: 14.sp,
+              color: ColorManager.textSecondary,
+            ),
           ),
           if (subtitle != null) ...[
             SizedBox(height: 4.h),
             Text(
               subtitle!,
-              style: TextStyle(fontSize: 12.sp, color: ColorManager.black),
+              style: TextStyle(
+                fontSize: 12.sp,
+                color: ColorManager.textTertiary,
+              ),
             ),
           ],
         ],

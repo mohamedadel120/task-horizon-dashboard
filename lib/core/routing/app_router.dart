@@ -9,6 +9,7 @@ import 'package:task_dashboard/features/categories/presentation/screens/add_cate
 import 'package:task_dashboard/features/products/presentation/screens/products_screen.dart';
 import 'package:task_dashboard/features/products/presentation/screens/add_product_screen.dart';
 import 'package:task_dashboard/features/layout/presentation/widgets/dashboard_layout.dart';
+import 'package:task_dashboard/core/models/product.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -51,6 +52,24 @@ class AppRouter {
               return BlocProvider(
                 create: (_) => getIt<ProductsCubit>()..listenToProducts(),
                 child: const ProductsScreen(),
+              );
+            },
+          ),
+          GoRoute(
+            path: '/products/edit/:id',
+            name: 'edit-product',
+            builder: (context, state) {
+              final productId = state.pathParameters['id'];
+              final product = state.extra as Product?;
+              return MultiBlocProvider(
+                providers: [
+                  BlocProvider(create: (_) => getIt<ProductsCubit>()),
+                  BlocProvider(
+                    create: (_) =>
+                        getIt<CategoriesCubit>()..listenToCategories(),
+                  ),
+                ],
+                child: AddProductScreen(productId: productId, product: product),
               );
             },
           ),

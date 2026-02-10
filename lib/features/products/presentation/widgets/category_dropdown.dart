@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:task_dashboard/core/base/cubit/base_state.dart';
+import 'package:task_dashboard/core/models/category.dart';
 import 'package:task_dashboard/core/theming/colors.dart';
 import 'package:task_dashboard/features/categories/presentation/cubit/categories_cubit.dart';
 import 'package:task_dashboard/features/categories/presentation/cubit/categories_state.dart';
@@ -80,8 +81,8 @@ class CategoryDropdown extends StatelessWidget {
                   hint: isLoading
                       ? const Text('Loading categories...')
                       : categories.isEmpty
-                      ? const Text('No categories available')
-                      : const Text('Select a category'),
+                          ? const Text('No categories available')
+                          : const Text('Select category...'),
                   items: categories.map((category) {
                     return DropdownMenuItem<String>(
                       value: category.id,
@@ -91,7 +92,16 @@ class CategoryDropdown extends StatelessWidget {
                   onChanged: categories.isEmpty
                       ? null
                       : (value) {
-                          context.read<ProductsCubit>().setCategory(value);
+                          Category? selected;
+                          for (final c in categories) {
+                            if (c.id == value) {
+                              selected = c;
+                              break;
+                            }
+                          }
+                          context
+                              .read<ProductsCubit>()
+                              .setCategory(value, selected?.name);
                         },
                   validator: (value) {
                     if (value == null || value.isEmpty) {

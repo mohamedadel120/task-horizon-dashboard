@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:task_dashboard/core/base/cubit/base_state.dart';
 import 'package:task_dashboard/core/models/product.dart';
 import 'package:task_dashboard/core/theming/colors.dart';
@@ -8,8 +10,29 @@ import 'package:task_dashboard/core/widgets/confirm_dialog.dart';
 import 'package:task_dashboard/features/products/presentation/cubit/products_cubit.dart';
 import 'package:task_dashboard/features/products/presentation/cubit/products_state.dart';
 
-class ProductDataTable extends StatelessWidget {
+const int _kPageSize = 5;
+
+class ProductDataTable extends StatefulWidget {
   const ProductDataTable({super.key});
+
+  @override
+  State<ProductDataTable> createState() => _ProductDataTableState();
+}
+
+class _ProductDataTableState extends State<ProductDataTable> {
+  int _currentPage = 0;
+
+  int _clampedPage(int totalCount) {
+    final maxPage = totalCount <= 0 ? 0 : ((totalCount - 1) / _kPageSize).floor();
+    return _currentPage.clamp(0, maxPage);
+  }
+
+  List<Product> _paginatedProducts(List<Product> products) {
+    final page = _clampedPage(products.length);
+    final start = page * _kPageSize;
+    if (start >= products.length) return [];
+    return products.skip(start).take(_kPageSize).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,9 +45,16 @@ class ProductDataTable extends StatelessWidget {
         if (status == BaseStatus.loading && products.isEmpty) {
           return Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: ColorManager.white,
               borderRadius: BorderRadius.circular(12.r),
               border: Border.all(color: ColorManager.grey300),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             padding: EdgeInsets.all(48.w),
             child: const Center(child: CircularProgressIndicator()),
@@ -35,9 +65,16 @@ class ProductDataTable extends StatelessWidget {
         if (status == BaseStatus.error && products.isEmpty) {
           return Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: ColorManager.white,
               borderRadius: BorderRadius.circular(12.r),
               border: Border.all(color: ColorManager.grey300),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             padding: EdgeInsets.all(48.w),
             child: Center(
@@ -68,9 +105,16 @@ class ProductDataTable extends StatelessWidget {
         if (products.isEmpty) {
           return Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: ColorManager.white,
               borderRadius: BorderRadius.circular(12.r),
               border: Border.all(color: ColorManager.grey300),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             padding: EdgeInsets.all(48.w),
             child: Center(
@@ -108,36 +152,45 @@ class ProductDataTable extends StatelessWidget {
         // Success state with data
         return Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: ColorManager.white,
             borderRadius: BorderRadius.circular(12.r),
             border: Border.all(color: ColorManager.grey300),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
           child: Column(
             children: [
-              // Table Header
+              // Table Header (Figma: Product Name, Category, Price, Quantity, Description, Actions)
               Container(
-                padding: EdgeInsets.all(16.w),
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                 decoration: BoxDecoration(
+                  color: ColorManager.grey100,
                   border: Border(
                     bottom: BorderSide(color: ColorManager.grey300),
                   ),
                 ),
                 child: Row(
                   children: [
-                    _buildHeaderCell('Product', flex: 3),
-                    _buildHeaderCell('Category', flex: 2),
+                    _buildHeaderCell('Product Name', flex: 3),
+                    _buildHeaderCell('Category', flex: 1),
                     _buildHeaderCell('Price', flex: 1),
-                    _buildHeaderCell('Stock', flex: 1),
-                    _buildHeaderCell('Status', flex: 1),
+                    _buildHeaderCell('Quantity', flex: 1),
+                    _buildHeaderCell('Description', flex: 2),
                     _buildHeaderCell('Actions', flex: 1),
                   ],
                 ),
               ),
-              // Table Rows
-              ...products.map(
+              // Table Rows (paginated)
+              ..._paginatedProducts(products).map(
                 (product) =>
                     _buildProductRow(context: context, product: product),
               ),
+              _buildPaginationFooter(products.length),
             ],
           ),
         );
@@ -152,10 +205,55 @@ class ProductDataTable extends StatelessWidget {
         text,
         style: TextStyle(
           fontSize: 12.sp,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w600,
           color: ColorManager.textSecondary,
           letterSpacing: 0.5,
         ),
+      ),
+    );
+  }
+
+  Widget _buildPaginationFooter(int totalCount) {
+    final page = _clampedPage(totalCount);
+    final start = totalCount == 0 ? 0 : (page * _kPageSize) + 1;
+    final end = (page * _kPageSize + _kPageSize).clamp(0, totalCount);
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: ColorManager.grey300)),
+      ),
+      child: Row(
+        children: [
+          Text(
+            'Showing $start-${end == 0 ? 0 : end} of $totalCount products',
+            style: TextStyle(
+              fontSize: 13.sp,
+              color: ColorManager.textSecondary,
+            ),
+          ),
+          const Spacer(),
+          OutlinedButton(
+            onPressed: _currentPage > 0
+                ? () => setState(() => _currentPage--)
+                : null,
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: ColorManager.grey300),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+            ),
+            child: const Text('Previous'),
+          ),
+          SizedBox(width: 12.w),
+          OutlinedButton(
+            onPressed: (page + 1) * _kPageSize < totalCount
+                ? () => setState(() => _currentPage++)
+                : null,
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: ColorManager.grey300),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+            ),
+            child: const Text('Next'),
+          ),
+        ],
       ),
     );
   }
@@ -165,16 +263,26 @@ class ProductDataTable extends StatelessWidget {
     required Product product,
   }) {
     final isOutOfStock = product.stock <= 0;
-    final isActive = product.status == ProductStatus.active;
+    final isLowStock = product.stock > 0 && product.stock <= 5;
+    // Figma: green = in stock, orange = low, red = out
+    final quantityColor = isOutOfStock
+        ? ColorManager.error
+        : isLowStock
+            ? ColorManager.warning
+            : ColorManager.success;
+    final subtitle = product.productType ?? product.sku;
+    final descriptionSnippet = (product.description ?? '—').length > 35
+        ? '${product.description!.substring(0, 35)}...'
+        : (product.description ?? '—');
 
     return Container(
-      padding: EdgeInsets.all(16.w),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: ColorManager.grey200)),
       ),
       child: Row(
         children: [
-          // Product
+          // Product Name (image + name + variant/subtitle)
           Expanded(
             flex: 3,
             child: Row(
@@ -212,24 +320,27 @@ class ProductDataTable extends StatelessWidget {
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         product.name,
                         style: TextStyle(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w500,
-                          color: ColorManager.black,
+                          color: ColorManager.textPrimary,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       SizedBox(height: 2.h),
                       Text(
-                        product.sku,
+                        subtitle,
                         style: TextStyle(
                           fontSize: 12.sp,
                           color: ColorManager.textTertiary,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
@@ -237,14 +348,25 @@ class ProductDataTable extends StatelessWidget {
               ],
             ),
           ),
-          // Category
+          // Category (pill)
           Expanded(
-            flex: 2,
-            child: Text(
-              product.categoryName ?? product.categoryId,
-              style: TextStyle(
-                fontSize: 14.sp,
-                color: ColorManager.textSecondary,
+            flex: 1,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+              decoration: BoxDecoration(
+                color: ColorManager.grey100,
+                borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(color: ColorManager.grey300),
+              ),
+              child: Text(
+                product.categoryName ?? product.categoryId,
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: ColorManager.textSecondary,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
               ),
             ),
           ),
@@ -255,49 +377,50 @@ class ProductDataTable extends StatelessWidget {
               '\$${product.price.toStringAsFixed(2)}',
               style: TextStyle(
                 fontSize: 14.sp,
-                fontWeight: FontWeight.w600,
-                color: ColorManager.black,
+                fontWeight: FontWeight.w500,
+                color: ColorManager.textPrimary,
               ),
             ),
           ),
-          // Stock
+          // Quantity (colored dot + number)
           Expanded(
             flex: 1,
-            child: Text(
-              isOutOfStock ? '-' : '${product.stock}',
-              style: TextStyle(
-                fontSize: 14.sp,
-                color: isOutOfStock
-                    ? ColorManager.error
-                    : ColorManager.textSecondary,
-              ),
-            ),
-          ),
-          // Status
-          Expanded(
-            flex: 1,
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-              decoration: BoxDecoration(
-                color: isActive && !isOutOfStock
-                    ? ColorManager.greenLight
-                    : ColorManager.redLight,
-                borderRadius: BorderRadius.circular(12.r),
-              ),
-              child: Text(
-                isOutOfStock ? 'Out of Stock' : product.status.displayName,
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w600,
-                  color: isActive && !isOutOfStock
-                      ? ColorManager.greenDark
-                      : ColorManager.redDark,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 8.w,
+                  height: 8.h,
+                  decoration: BoxDecoration(
+                    color: quantityColor,
+                    shape: BoxShape.circle,
+                  ),
                 ),
-                textAlign: TextAlign.center,
-              ),
+                SizedBox(width: 6.w),
+                Text(
+                  isOutOfStock ? '0' : '${product.stock}',
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    color: ColorManager.textPrimary,
+                  ),
+                ),
+              ],
             ),
           ),
-          // Actions
+          // Description (truncated)
+          Expanded(
+            flex: 2,
+            child: Text(
+              descriptionSnippet,
+              style: TextStyle(
+                fontSize: 13.sp,
+                color: ColorManager.textSecondary,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          // Actions (edit pencil, delete red trash)
           Expanded(
             flex: 1,
             child: Row(
@@ -307,15 +430,22 @@ class ProductDataTable extends StatelessWidget {
                   icon: Icon(Icons.edit_outlined, size: 18.sp),
                   color: ColorManager.textSecondary,
                   onPressed: () {
-                    // TODO: Navigate to edit screen
+                    context.go('/products/edit/${product.id}', extra: product);
                   },
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
                 ),
-                SizedBox(width: 12.w),
+                SizedBox(width: 8.w),
                 IconButton(
-                  icon: Icon(Icons.delete_outline, size: 18.sp),
-                  color: ColorManager.error,
+                  icon: SvgPicture.asset(
+                    'assets/icons/delete_icon.svg',
+                    width: 33.w,
+                    height: 33.h,
+                    colorFilter: ColorFilter.mode(
+                      ColorManager.error,
+                      BlendMode.srcIn,
+                    ),
+                  ),
                   onPressed: () async {
                     final confirmed = await ConfirmDialog.showDelete(
                       context,
