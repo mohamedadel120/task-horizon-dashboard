@@ -42,6 +42,11 @@ class AppSnackBar {
     );
   }
 
+  /// Show "coming soon" for features not yet implemented
+  static void showComingSoon(BuildContext context) {
+    showInfo(context, 'This will be available soon.');
+  }
+
   /// Show info message
   static void showInfo(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(

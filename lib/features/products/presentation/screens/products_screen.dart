@@ -5,19 +5,51 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:task_dashboard/core/theming/colors.dart';
 import 'package:task_dashboard/core/widgets/stat_card.dart';
+import 'package:task_dashboard/features/categories/presentation/cubit/categories_cubit.dart';
 import 'package:task_dashboard/features/products/presentation/cubit/products_cubit.dart';
 import 'package:task_dashboard/features/products/presentation/cubit/products_state.dart';
 import 'package:task_dashboard/features/products/presentation/widgets/product_data_table.dart';
+import 'package:task_dashboard/features/products/presentation/widgets/product_filter_dialog.dart';
 import 'package:task_dashboard/core/base/cubit/base_state.dart';
 import 'package:task_dashboard/core/widgets/app_snackbar.dart';
 
-class ProductsScreen extends StatelessWidget {
+class ProductsScreen extends StatefulWidget {
   const ProductsScreen({super.key});
+
+  @override
+  State<ProductsScreen> createState() => _ProductsScreenState();
+}
+
+class _ProductsScreenState extends State<ProductsScreen> {
+  final _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final query = context.read<ProductsCubit>().state.searchQuery;
+      if (_searchController.text != query) {
+        _searchController.text = query;
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocListener<ProductsCubit, ProductsState>(
       listener: (context, state) {
+        if (state.searchQuery != _searchController.text) {
+          _searchController.text = state.searchQuery;
+          _searchController.selection = TextSelection.collapsed(
+            offset: _searchController.text.length,
+          );
+        }
         final deleteStatus = state.getStatus('delete_product');
         if (deleteStatus == BaseStatus.success) {
           AppSnackBar.showSuccess(context, 'Product deleted successfully');
@@ -29,7 +61,30 @@ class ProductsScreen extends StatelessWidget {
         }
       },
       child: BlocBuilder<ProductsCubit, ProductsState>(
+        buildWhen: (prev, curr) =>
+            prev.products != curr.products ||
+            prev.searchQuery != curr.searchQuery ||
+            prev.filterCategoryId != curr.filterCategoryId ||
+            prev.filterStatus != curr.filterStatus,
         builder: (context, state) {
+          if (state.searchQuery != _searchController.text) {
+            _searchController.text = state.searchQuery;
+            _searchController.selection = TextSelection.collapsed(
+              offset: _searchController.text.length,
+            );
+          }
+          // Apply search from URL when navigating with ?q= (e.g. from top bar)
+          final uri = GoRouterState.of(context).uri;
+          final q = uri.queryParameters['q'];
+          if (q != null && q.isNotEmpty && state.searchQuery != q) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) return;
+              context.read<ProductsCubit>().setSearchQuery(q);
+              _searchController.text = q;
+              _searchController.selection =
+                  TextSelection.collapsed(offset: q.length);
+            });
+          }
           final products = state.products;
 
           // Calculate stats (order matches Figma: Total, Out of Stock, Total Value, Categories)
@@ -79,7 +134,7 @@ class ProductsScreen extends StatelessWidget {
                       label: const Text('Add Product'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: ColorManager.mainColor,
-                        foregroundColor: Colors.white,
+                        foregroundColor: ColorManager.white,
                         padding: EdgeInsets.symmetric(
                           horizontal: 20.w,
                           vertical: 12.h,
@@ -165,11 +220,14 @@ class ProductsScreen extends StatelessWidget {
                   children: [
                     Expanded(
                       child: TextField(
+                        controller: _searchController,
+                        onChanged: (value) =>
+                            context.read<ProductsCubit>().setSearchQuery(value),
                         decoration: InputDecoration(
                           hintText: 'Search products...',
                           prefixIcon: const Icon(Icons.search),
                           filled: true,
-                          fillColor: Colors.white,
+                          fillColor: ColorManager.white,
                           contentPadding: EdgeInsets.symmetric(
                             horizontal: 16.w,
                             vertical: 12.h,
@@ -191,9 +249,25 @@ class ProductsScreen extends StatelessWidget {
                     ),
                     SizedBox(width: 12.w),
                     OutlinedButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                        final productsCubit = context.read<ProductsCubit>();
+                        final categoriesCubit =
+                            context.read<CategoriesCubit>();
+                        showDialog(
+                          context: context,
+                          builder: (_) => MultiBlocProvider(
+                            providers: [
+                              BlocProvider.value(value: productsCubit),
+                              BlocProvider.value(value: categoriesCubit),
+                            ],
+                            child: const ProductFilterDialog(),
+                          ),
+                        );
+                      },
                       icon: const Icon(Icons.filter_list),
-                      label: const Text('Filter'),
+                      label: Text(
+                        state.hasActiveFilters ? 'Filter (on)' : 'Filter',
+                      ),
                       style: OutlinedButton.styleFrom(
                         padding: EdgeInsets.symmetric(
                           horizontal: 20.w,
@@ -207,7 +281,8 @@ class ProductsScreen extends StatelessWidget {
                     ),
                     SizedBox(width: 12.w),
                     OutlinedButton.icon(
-                      onPressed: () {},
+                      onPressed: () =>
+                          AppSnackBar.showComingSoon(context),
                       icon: const Icon(Icons.file_download_outlined),
                       label: const Text('Export'),
                       style: OutlinedButton.styleFrom(

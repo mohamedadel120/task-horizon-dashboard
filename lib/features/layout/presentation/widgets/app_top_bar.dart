@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:task_dashboard/core/theming/colors.dart';
+import 'package:task_dashboard/core/widgets/app_snackbar.dart';
 
 class AppTopBar extends StatelessWidget {
   final List<String> breadcrumbs;
@@ -19,7 +21,7 @@ class AppTopBar extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: ColorManager.black.withValues(alpha: 0.04),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -63,8 +65,13 @@ class AppTopBar extends StatelessWidget {
                 height: 40.h,
                 constraints: BoxConstraints(maxWidth: 320.w),
                 child: TextField(
+                  onSubmitted: (value) {
+                    final q = value.trim();
+                    if (q.isEmpty) return;
+                    context.go('/products?q=${Uri.encodeComponent(q)}');
+                  },
                   decoration: InputDecoration(
-                    hintText: 'Search...',
+                    hintText: 'Search products...',
                     hintStyle: TextStyle(
                       fontSize: 14.sp,
                       color: ColorManager.textTertiary,
@@ -97,7 +104,7 @@ class AppTopBar extends StatelessWidget {
               size: 24.sp,
               color: ColorManager.textSecondary,
             ),
-            onPressed: () {},
+            onPressed: () => AppSnackBar.showComingSoon(context),
           ),
           SizedBox(width: 8.w),
           IconButton(
@@ -106,7 +113,7 @@ class AppTopBar extends StatelessWidget {
               size: 24.sp,
               color: ColorManager.textSecondary,
             ),
-            onPressed: () {},
+            onPressed: () => AppSnackBar.showComingSoon(context),
           ),
         ],
       ),

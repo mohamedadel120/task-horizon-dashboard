@@ -11,7 +11,9 @@ import 'package:task_dashboard/features/categories/presentation/cubit/categories
 import 'package:task_dashboard/core/models/category.dart';
 
 class AddCategoryScreen extends StatefulWidget {
-  const AddCategoryScreen({super.key});
+  final Category? category;
+
+  const AddCategoryScreen({super.key, this.category});
 
   @override
   State<AddCategoryScreen> createState() => _AddCategoryScreenState();
@@ -24,11 +26,19 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
   final _descriptionController = TextEditingController();
   final _imageUrlController = TextEditingController();
 
+  bool get _isEditMode => widget.category != null;
+
   @override
   void initState() {
     super.initState();
-    // Auto-generate slug when name changes
     _nameController.addListener(_onNameChanged);
+    if (widget.category != null) {
+      final c = widget.category!;
+      _nameController.text = c.name;
+      _slugController.text = c.slug;
+      _descriptionController.text = c.description ?? '';
+      _imageUrlController.text = c.imageUrl ?? '';
+    }
   }
 
   void _onNameChanged() {
@@ -51,43 +61,64 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
   }
 
   Future<void> _saveCategory() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
+    if (!_formKey.currentState!.validate()) return;
+
+    final name = _nameController.text.trim();
+    final slug = _slugController.text.trim();
+    final description = _descriptionController.text.trim().isEmpty
+        ? null
+        : _descriptionController.text.trim();
+    final imageUrl = _imageUrlController.text.trim().isEmpty
+        ? null
+        : _imageUrlController.text.trim();
+
+    if (_isEditMode) {
+      final updated = widget.category!.copyWith(
+        name: name,
+        slug: slug.isEmpty ? Category.generateSlug(name) : slug,
+        description: description,
+        imageUrl: imageUrl,
+      );
+      context.read<CategoriesCubit>().updateCategory(updated);
+    } else {
+      context.read<CategoriesCubit>().addCategory(
+            name: name,
+            slug: slug,
+            description: description,
+            imageUrl: imageUrl,
+          );
     }
-
-    // Cubit handles loading state via BlocBuilder/Listener
-
-    context.read<CategoriesCubit>().addCategory(
-      name: _nameController.text.trim(),
-      slug: _slugController.text.trim(),
-      description: _descriptionController.text.trim().isEmpty
-          ? null
-          : _descriptionController.text.trim(),
-      imageUrl: _imageUrlController.text.trim().isEmpty
-          ? null
-          : _imageUrlController.text.trim(),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocListener<CategoriesCubit, CategoriesState>(
       listener: (context, state) {
-        final status = state.getStatus('add_category');
-        if (status == BaseStatus.success) {
+        final addStatus = state.getStatus('add_category');
+        final updateStatus = state.getStatus('update_category');
+        if (addStatus == BaseStatus.success) {
           AppSnackBar.showSuccess(context, 'Category created successfully!');
-          context.go('/categories');
-        } else if (status == BaseStatus.error) {
+          if (context.mounted) context.go('/categories');
+        } else if (addStatus == BaseStatus.error) {
           AppSnackBar.showError(
             context,
             state.getError('add_category') ?? 'Failed to create category',
           );
         }
+        if (updateStatus == BaseStatus.success) {
+          AppSnackBar.showSuccess(context, 'Category updated successfully!');
+          if (context.mounted) context.go('/categories');
+        } else if (updateStatus == BaseStatus.error) {
+          AppSnackBar.showError(
+            context,
+            state.getError('update_category') ?? 'Failed to update category',
+          );
+        }
       },
       child: BlocBuilder<CategoriesCubit, CategoriesState>(
         builder: (context, state) {
-          final isLoading =
-              state.getStatus('add_category') == BaseStatus.loading;
+          final isLoading = state.getStatus('add_category') == BaseStatus.loading ||
+              state.getStatus('update_category') == BaseStatus.loading;
 
           return Stack(
             children: [
@@ -96,9 +127,8 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Header
                     Text(
-                      'Add Category',
+                      _isEditMode ? 'Edit Category' : 'Add Category',
                       style: TextStyle(
                         fontSize: 28.sp,
                         fontWeight: FontWeight.bold,
@@ -107,7 +137,9 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                     ),
                     SizedBox(height: 4.h),
                     Text(
-                      'Create a new product category to organize your inventory.',
+                      _isEditMode
+                          ? 'Update category name, slug, description or image.'
+                          : 'Create a new product category to organize your inventory.',
                       style: TextStyle(
                         fontSize: 14.sp,
                         color: ColorManager.textSecondary,
@@ -120,7 +152,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                       constraints: BoxConstraints(maxWidth: 800.w),
                       padding: EdgeInsets.all(32.w),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: ColorManager.white,
                         borderRadius: BorderRadius.circular(12.r),
                         border: Border.all(color: ColorManager.grey300),
                       ),
@@ -211,7 +243,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                                   onPressed: isLoading ? null : _saveCategory,
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: ColorManager.mainColor,
-                                    foregroundColor: Colors.white,
+                                    foregroundColor: ColorManager.white,
                                     padding: EdgeInsets.symmetric(
                                       horizontal: 24.w,
                                       vertical: 14.h,
@@ -230,10 +262,14 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                                                 valueColor:
                                                     AlwaysStoppedAnimation<
                                                       Color
-                                                    >(Colors.white),
+                                                    >(ColorManager.white),
                                               ),
                                         )
-                                      : const Text('Create Category'),
+                                      : Text(
+                                          _isEditMode
+                                              ? 'Update Category'
+                                              : 'Create Category',
+                                        ),
                                 ),
                               ],
                             ),

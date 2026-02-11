@@ -22,7 +22,7 @@ class UserProfileCard extends StatelessWidget {
             child: Text(
               'SM',
               style: TextStyle(
-                color: Colors.white,
+                color: ColorManager.white,
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w600,
               ),

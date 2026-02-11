@@ -53,7 +53,7 @@ class CategoryDropdown extends StatelessWidget {
                   value: productsState.selectedCategoryId,
                   decoration: InputDecoration(
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: ColorManager.white,
                     contentPadding: EdgeInsets.symmetric(
                       horizontal: 16.w,
                       vertical: 12.h,

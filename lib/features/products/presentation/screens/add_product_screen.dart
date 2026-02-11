@@ -147,7 +147,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
               style: OutlinedButton.styleFrom(
                 padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
                 side: const BorderSide(color: ColorManager.grey300),
-                backgroundColor: Colors.white,
+                backgroundColor: ColorManager.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.r),
                 ),
@@ -168,7 +168,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                     },
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColorManager.mainColor,
-                foregroundColor: Colors.white,
+                foregroundColor: ColorManager.white,
                 padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.r),
@@ -180,7 +180,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                       height: 20.h,
                       child: const CircularProgressIndicator(
                         strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        valueColor: AlwaysStoppedAnimation<Color>(ColorManager.white),
                       ),
                     )
                   : Row(
@@ -191,7 +191,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                           width: 20.w,
                           height: 20.h,
                           colorFilter: const ColorFilter.mode(
-                            Colors.white,
+                            ColorManager.white,
                             BlendMode.srcIn,
                           ),
                         ),
