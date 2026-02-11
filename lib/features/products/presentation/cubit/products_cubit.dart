@@ -60,7 +60,7 @@ class ProductsCubit extends BaseCubit<ProductsState> {
 
   /// Add new product
   Future<void> addProduct(AddProductRequest request) async {
-    print('=== addProduct START ===');
+    log('addProduct: start');
     final now = DateTime.now();
     final product = Product(
       id: '',
@@ -80,26 +80,21 @@ class ProductsCubit extends BaseCubit<ProductsState> {
       updatedAt: now,
     );
 
-    print('=== addProduct: Product created, emitting loading ===');
     startOperation(_endpointAdd);
-    print('=== addProduct: Loading emitted, calling repository ===');
     try {
-      print('=== addProduct: toJson = ${product.toJson()} ===');
       final result = await _repository.addProduct(product);
-      print('=== addProduct: Repository returned: $result ===');
       result.fold(
         (failure) {
-          print('=== addProduct: FAILURE: ${failure.message} ===');
+          log('addProduct: failure ${failure.message}');
           failOperation(_endpointAdd, failure.message);
         },
         (data) {
-          print('=== addProduct: SUCCESS, id: $data ===');
+          log('addProduct: success id=$data');
           successOperation(_endpointAdd, data: data);
         },
       );
     } catch (e, stackTrace) {
-      print('=== addProduct: EXCEPTION: $e ===');
-      print('=== addProduct: STACK: $stackTrace ===');
+      log('addProduct: exception $e', stackTrace: stackTrace);
       failOperation(_endpointAdd, e.toString());
     }
   }
@@ -174,6 +169,33 @@ class ProductsCubit extends BaseCubit<ProductsState> {
     emit(state.copyWith(
       selectedCategoryId: categoryId,
       selectedCategoryName: categoryName,
+    ));
+  }
+
+  void setSearchQuery(String query) {
+    emit(state.copyWith(searchQuery: query));
+  }
+
+  void setFilterCategory(String? categoryId) {
+    emit(state.copyWith(filterCategoryId: categoryId));
+  }
+
+  void setFilterStatus(ProductStatus? status) {
+    emit(state.copyWith(filterStatus: status));
+  }
+
+  void setFilters({String? categoryId, ProductStatus? status}) {
+    emit(state.copyWith(
+      filterCategoryId: categoryId,
+      filterStatus: status,
+    ));
+  }
+
+  void clearFilters() {
+    emit(state.copyWith(
+      searchQuery: '',
+      filterCategoryId: null,
+      filterStatus: null,
     ));
   }
 

@@ -108,7 +108,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                       label: const Text('Add Category'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: ColorManager.mainColor,
-                        foregroundColor: Colors.white,
+                        foregroundColor: ColorManager.white,
                         padding: EdgeInsets.symmetric(
                           horizontal: 20.w,
                           vertical: 12.h,
@@ -169,7 +169,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                             label: const Text('Create Category'),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: ColorManager.mainColor,
-                              foregroundColor: Colors.white,
+                              foregroundColor: ColorManager.white,
                               padding: EdgeInsets.symmetric(
                                 horizontal: 24.w,
                                 vertical: 14.h,
@@ -194,23 +194,23 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                     itemCount: categories.length + 1,
                     itemBuilder: (context, index) {
                       if (index == categories.length) {
-                        return const CreateCategoryCard();
+                        return CreateCategoryCard(
+                          key: const ValueKey('create_category'),
+                        );
                       }
 
                       final category = categories[index];
                       return CategoryCard(
+                        key: ValueKey(category.id),
                         imageUrl: category.imageUrl ?? '',
                         name: category.name,
                         description: category.description ?? '',
                         itemCount: category.itemCount,
                         lastUpdated: _getTimeAgo(category.updatedAt),
-                        onEdit: () {
-                          // TODO: Navigate to edit screen
-                          AppSnackBar.showInfo(
-                            context,
-                            'Edit feature coming soon',
-                          );
-                        },
+                        onEdit: () => context.go(
+                          '/categories/edit/${category.id}',
+                          extra: category,
+                        ),
                         onDelete: () => _deleteCategory(
                           category.id,
                           category.name,

@@ -38,8 +38,16 @@ class _ProductDataTableState extends State<ProductDataTable> {
   Widget build(BuildContext context) {
     return BlocBuilder<ProductsCubit, ProductsState>(
       builder: (context, state) {
-        final products = state.products;
+        final products = state.filteredProducts;
         final status = state.getStatus('fetch_products');
+
+        // Reset to a valid page when filtered list shrinks
+        final safePage = _clampedPage(products.length);
+        if (safePage != _currentPage) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) setState(() => _currentPage = safePage);
+          });
+        }
 
         // Loading state
         if (status == BaseStatus.loading && products.isEmpty) {
@@ -50,7 +58,7 @@ class _ProductDataTableState extends State<ProductDataTable> {
               border: Border.all(color: ColorManager.grey300),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
+                  color: ColorManager.black.withValues(alpha: 0.04),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -70,7 +78,7 @@ class _ProductDataTableState extends State<ProductDataTable> {
               border: Border.all(color: ColorManager.grey300),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
+                  color: ColorManager.black.withValues(alpha: 0.04),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -110,7 +118,7 @@ class _ProductDataTableState extends State<ProductDataTable> {
               border: Border.all(color: ColorManager.grey300),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
+                  color: ColorManager.black.withValues(alpha: 0.04),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -157,7 +165,7 @@ class _ProductDataTableState extends State<ProductDataTable> {
             border: Border.all(color: ColorManager.grey300),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
+                color: ColorManager.black.withValues(alpha: 0.04),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -271,11 +279,12 @@ class _ProductDataTableState extends State<ProductDataTable> {
             ? ColorManager.warning
             : ColorManager.success;
     final subtitle = product.productType ?? product.sku;
-    final descriptionSnippet = (product.description ?? '—').length > 35
-        ? '${product.description!.substring(0, 35)}...'
-        : (product.description ?? '—');
+    final desc = product.description ?? '—';
+    final descriptionSnippet =
+        desc.length > 35 ? '${desc.substring(0, 35)}...' : desc;
 
     return Container(
+      key: ValueKey(product.id),
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: ColorManager.grey200)),

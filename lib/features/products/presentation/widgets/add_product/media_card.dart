@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:task_dashboard/core/theming/colors.dart';
+import 'package:task_dashboard/core/widgets/app_snackbar.dart';
 import 'package:task_dashboard/core/widgets/dashboard_text_field.dart';
 import 'package:task_dashboard/features/products/presentation/cubit/products_cubit.dart';
 import 'package:task_dashboard/features/products/presentation/widgets/add_product/section_card.dart';
@@ -34,11 +35,7 @@ class MediaCard extends StatelessWidget {
               Container(
                 margin: EdgeInsets.only(top: 28.h), // Align with input field
                 child: OutlinedButton(
-                  onPressed: () {
-                    // Trigger rebuild or validation if needed
-                    // For now, the ValueListenableBuilder handles the preview
-                    FocusScope.of(context).unfocus();
-                  },
+                  onPressed: () => AppSnackBar.showComingSoon(context),
                   style: OutlinedButton.styleFrom(
                     padding: EdgeInsets.symmetric(
                       horizontal: 20.w,

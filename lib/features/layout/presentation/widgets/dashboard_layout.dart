@@ -17,7 +17,12 @@ class DashboardLayout extends StatelessWidget {
     if (location == '/categories/add') {
       return ['Dashboard', 'Categories', 'Add Category'];
     }
-    if (location == '/products') return ['Dashboard', 'Products'];
+    if (location.startsWith('/categories/edit/')) {
+      return ['Dashboard', 'Categories', 'Edit Category'];
+    }
+    if (location == '/products' || location.startsWith('/products?')) {
+      return ['Dashboard', 'Products'];
+    }
     if (location == '/products/add') {
       return ['Dashboard', 'Products', 'Add Product'];
     }

@@ -23,7 +23,7 @@ class AppSidebar extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: ColorManager.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(-2, 0),
           ),
@@ -79,12 +79,14 @@ class AppSidebar extends StatelessWidget {
             route: '/orders',
             badgeCount: 4,
             isSelected: currentRoute == '/orders',
+            comingSoon: true,
           ),
           SidebarMenuItem(
             iconPath: 'assets/icons/customer_icon.svg',
             label: 'Customers',
             route: '/customers',
             isSelected: currentRoute == '/customers',
+            comingSoon: true,
           ),
           SizedBox(height: 20.h),
           // Settings Section
@@ -112,12 +114,14 @@ class AppSidebar extends StatelessWidget {
             label: 'General',
             route: '/settings/general',
             isSelected: currentRoute == '/settings/general',
+            comingSoon: true,
           ),
           SidebarMenuItem(
             iconPath: 'assets/icons/security_icon.svg',
             label: 'Security',
             route: '/settings/security',
             isSelected: currentRoute == '/settings/security',
+            comingSoon: true,
           ),
           const Spacer(),
           // User Profile

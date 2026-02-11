@@ -9,6 +9,7 @@ import 'package:task_dashboard/features/categories/presentation/screens/add_cate
 import 'package:task_dashboard/features/products/presentation/screens/products_screen.dart';
 import 'package:task_dashboard/features/products/presentation/screens/add_product_screen.dart';
 import 'package:task_dashboard/features/layout/presentation/widgets/dashboard_layout.dart';
+import 'package:task_dashboard/core/models/category.dart';
 import 'package:task_dashboard/core/models/product.dart';
 
 class AppRouter {
@@ -46,11 +47,30 @@ class AppRouter {
             },
           ),
           GoRoute(
+            path: '/categories/edit/:id',
+            name: 'edit-category',
+            builder: (context, state) {
+              final category = state.extra as Category?;
+              return BlocProvider(
+                create: (_) => getIt<CategoriesCubit>(),
+                child: AddCategoryScreen(category: category),
+              );
+            },
+          ),
+          GoRoute(
             path: '/products',
             name: 'products',
             builder: (context, state) {
-              return BlocProvider(
-                create: (_) => getIt<ProductsCubit>()..listenToProducts(),
+              return MultiBlocProvider(
+                providers: [
+                  BlocProvider(
+                    create: (_) => getIt<ProductsCubit>()..listenToProducts(),
+                  ),
+                  BlocProvider(
+                    create: (_) =>
+                        getIt<CategoriesCubit>()..listenToCategories(),
+                  ),
+                ],
                 child: const ProductsScreen(),
               );
             },
