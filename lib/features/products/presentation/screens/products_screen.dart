@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:task_dashboard/core/theming/colors.dart';
 import 'package:task_dashboard/core/widgets/stat_card.dart';
+import 'package:task_dashboard/features/categories/presentation/cubit/categories_cubit.dart';
 import 'package:task_dashboard/features/products/presentation/cubit/products_cubit.dart';
 import 'package:task_dashboard/features/products/presentation/cubit/products_state.dart';
 import 'package:task_dashboard/features/products/presentation/widgets/product_data_table.dart';
@@ -43,6 +44,12 @@ class _ProductsScreenState extends State<ProductsScreen> {
   Widget build(BuildContext context) {
     return BlocListener<ProductsCubit, ProductsState>(
       listener: (context, state) {
+        if (state.searchQuery != _searchController.text) {
+          _searchController.text = state.searchQuery;
+          _searchController.selection = TextSelection.collapsed(
+            offset: _searchController.text.length,
+          );
+        }
         final deleteStatus = state.getStatus('delete_product');
         if (deleteStatus == BaseStatus.success) {
           AppSnackBar.showSuccess(context, 'Product deleted successfully');
@@ -242,10 +249,21 @@ class _ProductsScreenState extends State<ProductsScreen> {
                     ),
                     SizedBox(width: 12.w),
                     OutlinedButton.icon(
-                      onPressed: () => showDialog(
-                        context: context,
-                        builder: (_) => const ProductFilterDialog(),
-                      ),
+                      onPressed: () {
+                        final productsCubit = context.read<ProductsCubit>();
+                        final categoriesCubit =
+                            context.read<CategoriesCubit>();
+                        showDialog(
+                          context: context,
+                          builder: (_) => MultiBlocProvider(
+                            providers: [
+                              BlocProvider.value(value: productsCubit),
+                              BlocProvider.value(value: categoriesCubit),
+                            ],
+                            child: const ProductFilterDialog(),
+                          ),
+                        );
+                      },
                       icon: const Icon(Icons.filter_list),
                       label: Text(
                         state.hasActiveFilters ? 'Filter (on)' : 'Filter',
