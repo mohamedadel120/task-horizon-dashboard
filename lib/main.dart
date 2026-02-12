@@ -9,10 +9,18 @@ import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Firebase
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e, st) {
+    // On web: ensure Firebase JS SDK is loaded in web/index.html
+    // and that your domain is in Firebase Console > Auth > Authorized domains
+    debugPrint('Firebase init error: $e');
+    debugPrint('Stack: $st');
+    rethrow;
+  }
 
-  // Setup dependency injection
   await setupDependencyInjection();
 
   runApp(const InventraApp());

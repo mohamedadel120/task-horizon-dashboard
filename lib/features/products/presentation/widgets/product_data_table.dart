@@ -158,7 +158,8 @@ class _ProductDataTableState extends State<ProductDataTable> {
         }
 
         // Success state with data
-        return Container(
+        const double kMinTableWidth = 700;
+        final tableContent = Container(
           decoration: BoxDecoration(
             color: ColorManager.white,
             borderRadius: BorderRadius.circular(12.r),
@@ -172,8 +173,8 @@ class _ProductDataTableState extends State<ProductDataTable> {
             ],
           ),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              // Table Header (Figma: Product Name, Category, Price, Quantity, Description, Actions)
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                 decoration: BoxDecoration(
@@ -193,7 +194,6 @@ class _ProductDataTableState extends State<ProductDataTable> {
                   ],
                 ),
               ),
-              // Table Rows (paginated)
               ..._paginatedProducts(products).map(
                 (product) =>
                     _buildProductRow(context: context, product: product),
@@ -201,6 +201,21 @@ class _ProductDataTableState extends State<ProductDataTable> {
               _buildPaginationFooter(products.length),
             ],
           ),
+        );
+
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            if (constraints.maxWidth < kMinTableWidth) {
+              return SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minWidth: kMinTableWidth),
+                  child: tableContent,
+                ),
+              );
+            }
+            return tableContent;
+          },
         );
       },
     );
