@@ -13,6 +13,7 @@ class SidebarMenuItem extends StatelessWidget {
   final bool isSelected;
   final int? badgeCount;
   final bool comingSoon;
+  final VoidCallback? onCloseDrawer;
 
   const SidebarMenuItem({
     super.key,
@@ -23,6 +24,7 @@ class SidebarMenuItem extends StatelessWidget {
     this.isSelected = false,
     this.badgeCount,
     this.comingSoon = false,
+    this.onCloseDrawer,
   }) : assert(
          iconPath != null || materialIcon != null,
          'Either iconPath or materialIcon must be provided',
@@ -32,6 +34,7 @@ class SidebarMenuItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
+        onCloseDrawer?.call();
         if (comingSoon) {
           AppSnackBar.showComingSoon(context);
         } else {

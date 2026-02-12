@@ -7,14 +7,17 @@ import 'package:task_dashboard/features/layout/presentation/widgets/sidebar_menu
 import 'package:task_dashboard/features/layout/presentation/widgets/user_profile_card.dart';
 
 class AppSidebar extends StatelessWidget {
-  const AppSidebar({super.key});
+  final VoidCallback? onCloseDrawer;
+
+  const AppSidebar({super.key, this.onCloseDrawer});
 
   @override
   Widget build(BuildContext context) {
     final currentRoute = GoRouterState.of(context).uri.toString();
 
+    final inDrawer = onCloseDrawer != null;
     return Container(
-      width: 240.w,
+      width: inDrawer ? null : 240.w,
       height: double.infinity,
       decoration: BoxDecoration(
         color: ColorManager.white,
@@ -60,18 +63,21 @@ class AppSidebar extends StatelessWidget {
             label: 'Dashboard',
             route: '/dashboard',
             isSelected: currentRoute == '/dashboard',
+            onCloseDrawer: onCloseDrawer,
           ),
           SidebarMenuItem(
             iconPath: 'assets/icons/product_icon.svg',
             label: 'Products',
             route: '/products',
             isSelected: currentRoute.startsWith('/products'),
+            onCloseDrawer: onCloseDrawer,
           ),
           SidebarMenuItem(
             iconPath: 'assets/icons/categories_icon.svg',
             label: 'Categories',
             route: '/categories',
             isSelected: currentRoute.startsWith('/categories'),
+            onCloseDrawer: onCloseDrawer,
           ),
           SidebarMenuItem(
             iconPath: 'assets/icons/order_icon.svg',
@@ -80,6 +86,7 @@ class AppSidebar extends StatelessWidget {
             badgeCount: 4,
             isSelected: currentRoute == '/orders',
             comingSoon: true,
+            onCloseDrawer: onCloseDrawer,
           ),
           SidebarMenuItem(
             iconPath: 'assets/icons/customer_icon.svg',
@@ -87,6 +94,7 @@ class AppSidebar extends StatelessWidget {
             route: '/customers',
             isSelected: currentRoute == '/customers',
             comingSoon: true,
+            onCloseDrawer: onCloseDrawer,
           ),
           SizedBox(height: 20.h),
           // Settings Section
@@ -115,6 +123,7 @@ class AppSidebar extends StatelessWidget {
             route: '/settings/general',
             isSelected: currentRoute == '/settings/general',
             comingSoon: true,
+            onCloseDrawer: onCloseDrawer,
           ),
           SidebarMenuItem(
             iconPath: 'assets/icons/security_icon.svg',
@@ -122,6 +131,7 @@ class AppSidebar extends StatelessWidget {
             route: '/settings/security',
             isSelected: currentRoute == '/settings/security',
             comingSoon: true,
+            onCloseDrawer: onCloseDrawer,
           ),
           const Spacer(),
           // User Profile

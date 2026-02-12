@@ -75,3 +75,69 @@ dart run flutterfire_cli:flutterfire configure
 ```
 
 This updates `lib/firebase_options.dart` and keeps web (and other platforms) in sync.
+
+---
+
+## 8. Hosting the dashboard on Firebase
+
+The project is set up for **Firebase Hosting**. Your app will be available at `https://task-60403.web.app` (and `https://task-60403.firebaseapp.com`).
+
+### One-time setup
+
+1. **Install Firebase CLI** (if not already):
+   ```bash
+   npm install -g firebase-tools
+   ```
+2. **Log in** to your Google account:
+   ```bash
+   firebase login
+   ```
+3. **Confirm project** – `.firebaserc` is already set to project `task-60403`. To use another project:
+   ```bash
+   firebase use task-60403
+   ```
+
+### Deploy
+
+1. **Build** the Flutter web app:
+   ```bash
+   flutter build web --no-tree-shake-icons
+   ```
+   This creates the `build/web` folder. (We use `--no-tree-shake-icons` to avoid the icon font subsetting step that can fail on some systems.)
+
+2. **Deploy** to Firebase Hosting:
+   ```bash
+   firebase deploy
+   ```
+   Or deploy only hosting (skip other Firebase features):
+   ```bash
+   firebase deploy --only hosting
+   ```
+
+3. After deploy, open:
+   - **Hosting URL**: https://task-60403.web.app  
+   (or the URL shown in the terminal)
+
+### Optional: one-command deploy
+
+From the project root you can run:
+
+```bash
+./scripts/deploy.sh
+```
+
+Or manually:
+
+```bash
+flutter build web --no-tree-shake-icons && firebase deploy --only hosting
+```
+
+### Add your domain to Authorized domains
+
+After the first deploy, add the Hosting domain to Firebase so the app can use Firestore/Storage from production:
+
+1. **Authentication** → **Settings** → **Authorized domains**.
+2. Add:
+   - `task-60403.web.app`
+   - `task-60403.firebaseapp.com`
+   (and any custom domain you attach later in Hosting).

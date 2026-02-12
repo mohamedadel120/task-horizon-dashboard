@@ -6,14 +6,21 @@ import 'package:task_dashboard/core/widgets/app_snackbar.dart';
 
 class AppTopBar extends StatelessWidget {
   final List<String> breadcrumbs;
+  final bool showMenuButton;
+  final VoidCallback? onMenuTap;
 
-  const AppTopBar({super.key, this.breadcrumbs = const []});
+  const AppTopBar({
+    super.key,
+    this.breadcrumbs = const [],
+    this.showMenuButton = false,
+    this.onMenuTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       height: 64.h,
-      padding: EdgeInsets.symmetric(horizontal: 24.w),
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
       decoration: BoxDecoration(
         color: ColorManager.white,
         border: const Border(
@@ -29,6 +36,14 @@ class AppTopBar extends StatelessWidget {
       ),
       child: Row(
         children: [
+          if (showMenuButton && onMenuTap != null)
+            IconButton(
+              icon: Icon(Icons.menu, size: 24.sp),
+              onPressed: onMenuTap,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+            ),
+          if (showMenuButton && onMenuTap != null) SizedBox(width: 8.w),
           // Breadcrumbs
           if (breadcrumbs.isNotEmpty)
             Row(
@@ -58,41 +73,47 @@ class AppTopBar extends StatelessWidget {
                 ],
               ],
             ),
-          SizedBox(width: 24.w),
+          SizedBox(width: 12.w),
           Expanded(
             child: Center(
-              child: Container(
-                height: 40.h,
-                constraints: BoxConstraints(maxWidth: 320.w),
-                child: TextField(
-                  onSubmitted: (value) {
-                    final q = value.trim();
-                    if (q.isEmpty) return;
-                    context.go('/products?q=${Uri.encodeComponent(q)}');
-                  },
-                  decoration: InputDecoration(
-                    hintText: 'Search products...',
-                    hintStyle: TextStyle(
-                      fontSize: 14.sp,
-                      color: ColorManager.textTertiary,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final showSearch = constraints.maxWidth > 200;
+                  if (!showSearch) return const SizedBox.shrink();
+                  return Container(
+                    height: 40.h,
+                    constraints: BoxConstraints(maxWidth: 320.w),
+                    child: TextField(
+                      onSubmitted: (value) {
+                        final q = value.trim();
+                        if (q.isEmpty) return;
+                        context.go('/products?q=${Uri.encodeComponent(q)}');
+                      },
+                      decoration: InputDecoration(
+                        hintText: 'Search products...',
+                        hintStyle: TextStyle(
+                          fontSize: 14.sp,
+                          color: ColorManager.textTertiary,
+                        ),
+                        prefixIcon: Icon(
+                          Icons.search,
+                          size: 20.sp,
+                          color: ColorManager.textTertiary,
+                        ),
+                        filled: true,
+                        fillColor: ColorManager.bgLight,
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 16.w,
+                          vertical: 10.h,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.r),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
                     ),
-                    prefixIcon: Icon(
-                      Icons.search,
-                      size: 20.sp,
-                      color: ColorManager.textTertiary,
-                    ),
-                    filled: true,
-                    fillColor: ColorManager.bgLight,
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 16.w,
-                      vertical: 10.h,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.r),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
+                  );
+                },
               ),
             ),
           ),

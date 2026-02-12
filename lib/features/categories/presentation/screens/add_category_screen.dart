@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:task_dashboard/core/base/cubit/base_state.dart';
 import 'package:task_dashboard/core/theming/colors.dart';
+import 'package:task_dashboard/core/utils/responsive.dart';
 import 'package:task_dashboard/core/widgets/dashboard_text_field.dart';
 import 'package:task_dashboard/core/widgets/app_snackbar.dart';
 import 'package:task_dashboard/features/categories/presentation/cubit/categories_cubit.dart';
@@ -123,7 +124,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
           return Stack(
             children: [
               SingleChildScrollView(
-                padding: EdgeInsets.all(24.w),
+                padding: EdgeInsets.all(context.pagePadding),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
