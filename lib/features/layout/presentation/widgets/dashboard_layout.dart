@@ -65,6 +65,7 @@ class _DashboardLayoutState extends State<DashboardLayout> {
       key: _scaffoldKey,
       backgroundColor: ColorManager.bgLight,
       drawer: Drawer(
+        width: (MediaQuery.sizeOf(context).width * 0.82).clamp(280.0, 320.0),
         child: AppSidebar(
           onCloseDrawer: () => Navigator.of(context).pop(),
         ),

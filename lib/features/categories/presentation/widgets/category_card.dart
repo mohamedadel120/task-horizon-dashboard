@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:task_dashboard/core/theming/colors.dart';
+import 'package:task_dashboard/core/utils/responsive.dart';
 
 class CategoryCard extends StatelessWidget {
   final String imageUrl;
@@ -76,7 +77,7 @@ class CategoryCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '$itemCount items',
+                      itemCount == 1 ? '1 product' : '$itemCount products',
                       style: TextStyle(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
@@ -114,22 +115,28 @@ class CategoryCard extends StatelessWidget {
                     ),
                     const Spacer(),
                     IconButton(
-                      icon: Icon(Icons.edit_outlined, size: 18.sp),
+                      icon: Icon(Icons.edit_outlined, size: 20.sp),
                       color: ColorManager.textSecondary,
                       onPressed: onEdit,
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
+                      style: IconButton.styleFrom(
+                        minimumSize: const Size(ResponsiveContext.minTouchTarget, ResponsiveContext.minTouchTarget),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
                     ),
-                    SizedBox(width: 12.w),
-                    GestureDetector(
+                    SizedBox(width: 8.w),
+                    InkWell(
                       onTap: onDelete,
-                      child: SvgPicture.asset(
-                        'assets/icons/delete_icon.svg',
-                        width: 33.w,
-                        height: 33.h,
-                        colorFilter: ColorFilter.mode(
-                          ColorManager.error,
-                          BlendMode.srcIn,
+                      borderRadius: BorderRadius.circular(8.r),
+                      child: Padding(
+                        padding: EdgeInsets.all(3.w),
+                        child: SvgPicture.asset(
+                          'assets/icons/delete_icon.svg',
+                          width: 30.w,
+                          height: 30.h,
+                          colorFilter: ColorFilter.mode(
+                            ColorManager.error,
+                            BlendMode.srcIn,
+                          ),
                         ),
                       ),
                     ),

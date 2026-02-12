@@ -27,7 +27,7 @@
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="icon" type="image/png" href="favicon.png?v=2"/>
 
   <title>Inventra Dashboard</title>
   <link rel="manifest" href="manifest.json">
@@ -36,8 +36,111 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+
+  <style>
+    #flutter-loading {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #ffffff;
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+    }
+    #flutter-loading.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    #flutter-loading .loader-icon {
+      width: 120px;
+      height: 120px;
+      animation: loader-pulse 1.4s ease-in-out infinite both;
+    }
+    #flutter-loading .loader-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.2));
+    }
+    #flutter-loading .loader-bar {
+      width: 120px;
+      height: 4px;
+      margin-top: 28px;
+      background: rgba(0,0,0,0.08);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    #flutter-loading .loader-bar::after {
+      content: '';
+      display: block;
+      width: 40%;
+      height: 100%;
+      background: #0175C2;
+      border-radius: 2px;
+      animation: loader-progress 1.2s ease-in-out infinite;
+    }
+    @keyframes loader-pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.06); opacity: 0.92; }
+    }
+    @keyframes loader-progress {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(350%); }
+    }
+  </style>
 </head>
 <body>
+  <div id="flutter-loading" aria-hidden="true">
+    <div class="loader-icon">
+      <img src="loading-icon.png" alt="Loading" />
+    </div>
+    <div class="loader-bar"></div>
+  </div>
   <script src="flutter_bootstrap.js" async></script>
+  <script>
+    (function() {
+      function hideLoader() {
+        var loader = document.getElementById('flutter-loading');
+        if (loader && !loader.classList.contains('hidden')) {
+          loader.classList.add('hidden');
+          setTimeout(function() {
+            loader.remove();
+          }, 450);
+        }
+      }
+      function checkFlutterReady() {
+        if (document.querySelector('flt-glass-pane') ||
+            document.querySelector('flt-scene-host') ||
+            document.querySelector('canvas') ||
+            document.querySelector('[id="main"]')) {
+          hideLoader();
+          return true;
+        }
+        return false;
+      }
+      if (document.readyState === 'complete') {
+        var attempts = 0;
+        var interval = setInterval(function() {
+          if (checkFlutterReady() || attempts++ > 300) {
+            clearInterval(interval);
+            if (attempts > 300) hideLoader();
+          }
+        }, 50);
+      } else {
+        window.addEventListener('load', function() {
+          var attempts = 0;
+          var interval = setInterval(function() {
+            if (checkFlutterReady() || attempts++ > 300) {
+              clearInterval(interval);
+              if (attempts > 300) hideLoader();
+            }
+          }, 50);
+        });
+      }
+    })();
+  </script>
 </body>
 </html>

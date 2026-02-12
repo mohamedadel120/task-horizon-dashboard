@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:task_dashboard/core/models/product.dart';
 import 'package:task_dashboard/core/theming/colors.dart';
+import 'package:task_dashboard/core/utils/responsive.dart';
 import 'package:task_dashboard/core/widgets/confirm_dialog.dart';
 import 'package:task_dashboard/features/products/presentation/cubit/products_cubit.dart';
 
@@ -109,8 +110,13 @@ class ProductMobileCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  PopupMenuButton<String>(
-                    icon: Icon(Icons.more_vert, color: ColorManager.textSecondary),
+                  SizedBox(
+                    width: ResponsiveContext.minTouchTarget,
+                    height: ResponsiveContext.minTouchTarget,
+                    child: PopupMenuButton<String>(
+                      padding: EdgeInsets.zero,
+                      iconSize: 24.sp,
+                      icon: Icon(Icons.more_vert, color: ColorManager.textSecondary, size: 24.sp),
                     onSelected: (value) async {
                       if (value == 'edit') {
                         context.go('/products/edit/${product.id}', extra: product);
@@ -147,6 +153,7 @@ class ProductMobileCard extends StatelessWidget {
                       ),
                     ],
                   ),
+                    ),
                 ],
               ),
             ],

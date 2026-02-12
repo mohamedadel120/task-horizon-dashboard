@@ -12,6 +12,7 @@ class CreateCategoryCard extends StatelessWidget {
       onTap: () => context.go('/categories/add'),
       borderRadius: BorderRadius.circular(16.r),
       child: Container(
+        padding: EdgeInsets.symmetric(vertical: 24.h, horizontal: 16.w),
         decoration: BoxDecoration(
           color: ColorManager.bgLight,
           borderRadius: BorderRadius.circular(16.r),

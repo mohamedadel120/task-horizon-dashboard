@@ -38,21 +38,22 @@ class ProductsMobileView extends StatelessWidget {
     final filtered = state.filteredProducts;
 
     return SingleChildScrollView(
-      padding: EdgeInsets.all(padding),
+      padding: EdgeInsets.symmetric(horizontal: padding, vertical: 16.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildHeader(context),
-          SizedBox(height: 20.h),
+          SizedBox(height: 18.h),
           _buildStatsGrid(
+            context,
             totalProducts,
             outOfStock,
             totalValue,
             categoryCount,
           ),
-          SizedBox(height: 20.h),
+          SizedBox(height: 18.h),
           _buildFiltersColumn(context),
-          SizedBox(height: 20.h),
+          SizedBox(height: 18.h),
           _buildProductList(filtered),
         ],
       ),
@@ -89,6 +90,7 @@ class ProductsMobileView extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: ColorManager.mainColor,
               foregroundColor: ColorManager.white,
+              minimumSize: const Size(double.infinity, 48),
               padding: EdgeInsets.symmetric(vertical: 14.h),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8.r),
@@ -101,11 +103,13 @@ class ProductsMobileView extends StatelessWidget {
   }
 
   Widget _buildStatsGrid(
+    BuildContext context,
     int totalProducts,
     int outOfStock,
     double totalValue,
     int categoryCount,
   ) {
+    final gap = context.isMobile ? 10.0 : 12.0;
     return Column(
       children: [
         Row(
@@ -118,7 +122,7 @@ class ProductsMobileView extends StatelessWidget {
                 iconColor: ColorManager.mainColor,
               ),
             ),
-            SizedBox(width: 12.w),
+            SizedBox(width: gap.w),
             Expanded(
               child: StatCard(
                 title: 'Out of Stock',
@@ -130,7 +134,7 @@ class ProductsMobileView extends StatelessWidget {
             ),
           ],
         ),
-        SizedBox(height: 12.h),
+        SizedBox(height: gap.h),
         Row(
           children: [
             Expanded(
@@ -145,7 +149,7 @@ class ProductsMobileView extends StatelessWidget {
                 iconColor: ColorManager.success,
               ),
             ),
-            SizedBox(width: 12.w),
+            SizedBox(width: gap.w),
             Expanded(
               child: StatCard(
                 title: 'Categories',
@@ -206,12 +210,13 @@ class ProductsMobileView extends StatelessWidget {
                     ),
                   );
                 },
-                icon: const Icon(Icons.filter_list, size: 20),
+                icon: Icon(Icons.filter_list, size: 20.sp),
                 label: Text(
                   state.hasActiveFilters ? 'Filter (on)' : 'Filter',
                   style: TextStyle(fontSize: 13.sp),
                 ),
                 style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(0, 48),
                   padding: EdgeInsets.symmetric(vertical: 12.h),
                   side: const BorderSide(color: ColorManager.grey300),
                   shape: RoundedRectangleBorder(
@@ -224,9 +229,10 @@ class ProductsMobileView extends StatelessWidget {
             Expanded(
               child: OutlinedButton.icon(
                 onPressed: () => AppSnackBar.showComingSoon(context),
-                icon: const Icon(Icons.file_download_outlined, size: 20),
+                icon: Icon(Icons.file_download_outlined, size: 20.sp),
                 label: Text('Export', style: TextStyle(fontSize: 13.sp)),
                 style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(0, 48),
                   padding: EdgeInsets.symmetric(vertical: 12.h),
                   side: const BorderSide(color: ColorManager.grey300),
                   shape: RoundedRectangleBorder(

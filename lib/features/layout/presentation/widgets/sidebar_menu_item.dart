@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:task_dashboard/core/theming/colors.dart';
+import 'package:task_dashboard/core/utils/responsive.dart';
 import 'package:task_dashboard/core/widgets/app_snackbar.dart';
 
 class SidebarMenuItem extends StatelessWidget {
@@ -41,8 +42,10 @@ class SidebarMenuItem extends StatelessWidget {
           context.go(route);
         }
       },
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: ResponsiveContext.minTouchTarget + 8),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
         margin: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
         decoration: BoxDecoration(
           color: isSelected
@@ -103,6 +106,7 @@ class SidebarMenuItem extends StatelessWidget {
                 ),
               ),
           ],
+        ),
         ),
       ),
     );

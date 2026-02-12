@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:task_dashboard/core/theming/colors.dart';
+import 'package:task_dashboard/core/utils/responsive.dart';
 import 'package:task_dashboard/core/widgets/stat_card.dart';
 
 const String _productIcon = 'assets/icons/product_icon.svg';
@@ -13,9 +14,11 @@ class DashboardStatsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = context.isMobile;
+    final gap = isMobile ? 10.0 : 16.0;
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isNarrow = constraints.maxWidth < 700;
+        final isNarrow = constraints.maxWidth < 700 || isMobile;
         if (isNarrow) {
           return Column(
             children: [
@@ -29,7 +32,7 @@ class DashboardStatsRow extends StatelessWidget {
                       iconColor: ColorManager.mainColor,
                     ),
                   ),
-                  SizedBox(width: 16.w),
+                  SizedBox(width: gap.w),
                   Expanded(
                     child: StatCard(
                       title: 'Categories',
@@ -40,7 +43,7 @@ class DashboardStatsRow extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 16.h),
+              SizedBox(height: gap.h),
               Row(
                 children: [
                   Expanded(
@@ -51,7 +54,7 @@ class DashboardStatsRow extends StatelessWidget {
                       iconColor: ColorManager.accent100,
                     ),
                   ),
-                  SizedBox(width: 16.w),
+                  SizedBox(width: gap.w),
                   Expanded(
                     child: StatCard(
                       title: 'Customers',

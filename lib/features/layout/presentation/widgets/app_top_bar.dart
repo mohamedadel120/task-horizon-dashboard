@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:task_dashboard/core/theming/colors.dart';
+import 'package:task_dashboard/core/utils/responsive.dart';
 import 'package:task_dashboard/core/widgets/app_snackbar.dart';
 
 class AppTopBar extends StatelessWidget {
@@ -18,9 +19,11 @@ class AppTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final padding = context.pagePadding;
+    final isMobile = context.isMobile;
     return Container(
-      height: 64.h,
-      padding: EdgeInsets.symmetric(horizontal: 16.w),
+      height: 56.h.clamp(48, 64),
+      padding: EdgeInsets.symmetric(horizontal: padding),
       decoration: BoxDecoration(
         color: ColorManager.white,
         border: const Border(
@@ -40,85 +43,98 @@ class AppTopBar extends StatelessWidget {
             IconButton(
               icon: Icon(Icons.menu, size: 24.sp),
               onPressed: onMenuTap,
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-            ),
-          if (showMenuButton && onMenuTap != null) SizedBox(width: 8.w),
-          // Breadcrumbs
-          if (breadcrumbs.isNotEmpty)
-            Row(
-              children: [
-                for (int i = 0; i < breadcrumbs.length; i++) ...[
-                  if (i > 0)
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8.w),
-                      child: Icon(
-                        Icons.chevron_right,
-                        size: 16.sp,
-                        color: ColorManager.textTertiary,
-                      ),
-                    ),
-                  Text(
-                    breadcrumbs[i],
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      color: i == breadcrumbs.length - 1
-                          ? ColorManager.textPrimary
-                          : ColorManager.textSecondary,
-                      fontWeight: i == breadcrumbs.length - 1
-                          ? FontWeight.w500
-                          : FontWeight.w400,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Center(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final showSearch = constraints.maxWidth > 200;
-                  if (!showSearch) return const SizedBox.shrink();
-                  return Container(
-                    height: 40.h,
-                    constraints: BoxConstraints(maxWidth: 320.w),
-                    child: TextField(
-                      onSubmitted: (value) {
-                        final q = value.trim();
-                        if (q.isEmpty) return;
-                        context.go('/products?q=${Uri.encodeComponent(q)}');
-                      },
-                      decoration: InputDecoration(
-                        hintText: 'Search products...',
-                        hintStyle: TextStyle(
-                          fontSize: 14.sp,
-                          color: ColorManager.textTertiary,
-                        ),
-                        prefixIcon: Icon(
-                          Icons.search,
-                          size: 20.sp,
-                          color: ColorManager.textTertiary,
-                        ),
-                        filled: true,
-                        fillColor: ColorManager.bgLight,
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 16.w,
-                          vertical: 10.h,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.r),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                    ),
-                  );
-                },
+              padding: EdgeInsets.all(12.w),
+              style: IconButton.styleFrom(
+                minimumSize: const Size(ResponsiveContext.minTouchTarget, ResponsiveContext.minTouchTarget),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
             ),
-          ),
+          if (showMenuButton && onMenuTap != null) SizedBox(width: 4.w),
+          // Breadcrumbs – truncate on mobile
+          if (breadcrumbs.isNotEmpty)
+            Expanded(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (int i = 0; i < breadcrumbs.length; i++) ...[
+                      if (i > 0)
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 4.w),
+                          child: Icon(
+                            Icons.chevron_right,
+                            size: 16.sp,
+                            color: ColorManager.textTertiary,
+                          ),
+                        ),
+                      Text(
+                        breadcrumbs[i],
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          color: i == breadcrumbs.length - 1
+                              ? ColorManager.textPrimary
+                              : ColorManager.textSecondary,
+                          fontWeight: i == breadcrumbs.length - 1
+                              ? FontWeight.w500
+                              : FontWeight.w400,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          if (!isMobile) SizedBox(width: 12.w),
+          // Search – hidden on mobile (use in-screen search)
+          if (!isMobile)
+            Expanded(
+              child: Center(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final showSearch = constraints.maxWidth > 200;
+                    if (!showSearch) return const SizedBox.shrink();
+                    return Container(
+                      height: 40.h,
+                      constraints: BoxConstraints(maxWidth: 320.w),
+                      child: TextField(
+                        onSubmitted: (value) {
+                          final q = value.trim();
+                          if (q.isEmpty) return;
+                          context.go('/products?q=${Uri.encodeComponent(q)}');
+                        },
+                        decoration: InputDecoration(
+                          hintText: 'Search products...',
+                          hintStyle: TextStyle(
+                            fontSize: 14.sp,
+                            color: ColorManager.textTertiary,
+                          ),
+                          prefixIcon: Icon(
+                            Icons.search,
+                            size: 20.sp,
+                            color: ColorManager.textTertiary,
+                          ),
+                          filled: true,
+                          fillColor: ColorManager.bgLight,
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 16.w,
+                            vertical: 10.h,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8.r),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
           const Spacer(),
-          // Action Buttons
+          // Action Buttons – ensure 48px touch targets
           IconButton(
             icon: Icon(
               Icons.notifications_outlined,
@@ -126,8 +142,11 @@ class AppTopBar extends StatelessWidget {
               color: ColorManager.textSecondary,
             ),
             onPressed: () => AppSnackBar.showComingSoon(context),
+            style: IconButton.styleFrom(
+              minimumSize: const Size(ResponsiveContext.minTouchTarget, ResponsiveContext.minTouchTarget),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
           ),
-          SizedBox(width: 8.w),
           IconButton(
             icon: Icon(
               Icons.help_outline,
@@ -135,6 +154,10 @@ class AppTopBar extends StatelessWidget {
               color: ColorManager.textSecondary,
             ),
             onPressed: () => AppSnackBar.showComingSoon(context),
+            style: IconButton.styleFrom(
+              minimumSize: const Size(ResponsiveContext.minTouchTarget, ResponsiveContext.minTouchTarget),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
           ),
         ],
       ),

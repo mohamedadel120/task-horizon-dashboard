@@ -31,16 +31,23 @@ class InventraApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ScreenUtilInit(
-      designSize: const Size(1440, 1024), // Desktop design size
-      minTextAdapt: true,
-      splitScreenMode: true,
-      builder: (context, child) {
-        return MaterialApp.router(
-          title: 'Inventra Dashboard',
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.lightTheme,
-          routerConfig: AppRouter.router,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final w = constraints.maxWidth;
+        final isMobile = w < 600;
+        // Mobile: 393x852 (common phone) for readable sizing
+        // Desktop: 1440x1024 for large screens
+        final designSize = isMobile ? const Size(393, 852) : const Size(1440, 1024);
+        return ScreenUtilInit(
+          designSize: designSize,
+          minTextAdapt: true,
+          splitScreenMode: true,
+          builder: (_, __) => MaterialApp.router(
+            title: 'Inventra Dashboard',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            routerConfig: AppRouter.router,
+          ),
         );
       },
     );

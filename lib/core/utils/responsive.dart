@@ -13,6 +13,9 @@ class Breakpoints {
 
   /// Desktop: small laptops and up
   static const double desktop = 1200;
+
+  /// Extra small phones (e.g. 320px width)
+  static const double mobileSm = 360;
 }
 
 /// Responsive helpers for [BuildContext].
@@ -34,10 +37,17 @@ extension ResponsiveContext on BuildContext {
     return 3;
   }
 
-  /// Horizontal padding for page content (smaller on mobile).
+  /// Horizontal padding for page content (responsive).
   double get pagePadding {
+    if (screenWidth < Breakpoints.mobileSm) return 12;
     if (screenWidth < Breakpoints.mobile) return 16;
     if (screenWidth < Breakpoints.tablet) return 20;
     return 24;
   }
+
+  /// Minimum touch target size (Material: 48x48).
+  static const double minTouchTarget = 48;
+
+  /// Safe area insets (for bottom nav, notches, etc.).
+  EdgeInsets get safePadding => MediaQuery.paddingOf(this);
 }

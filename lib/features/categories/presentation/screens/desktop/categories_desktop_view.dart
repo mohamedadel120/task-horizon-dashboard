@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:task_dashboard/core/base/cubit/base_state.dart';
@@ -8,6 +9,7 @@ import 'package:task_dashboard/core/utils/responsive.dart';
 import 'package:task_dashboard/features/categories/presentation/cubit/categories_state.dart';
 import 'package:task_dashboard/features/categories/presentation/widgets/category_card.dart';
 import 'package:task_dashboard/features/categories/presentation/widgets/create_category_card.dart';
+import 'package:task_dashboard/features/products/presentation/cubit/products_cubit.dart';
 
 class CategoriesDesktopView extends StatelessWidget {
   const CategoriesDesktopView({
@@ -117,12 +119,15 @@ class CategoriesDesktopView extends StatelessWidget {
           return const CreateCategoryCard(key: ValueKey('create_category'));
         }
         final category = categories[index];
+        final products = context.watch<ProductsCubit>().state.products;
+        final productCount =
+            products.where((p) => p.categoryId == category.id).length;
         return CategoryCard(
           key: ValueKey(category.id),
           imageUrl: category.imageUrl ?? '',
           name: category.name,
           description: category.description ?? '',
-          itemCount: category.itemCount,
+          itemCount: productCount,
           lastUpdated: getTimeAgo(category.updatedAt),
           onEdit: () => context.go(
             '/categories/edit/${category.id}',

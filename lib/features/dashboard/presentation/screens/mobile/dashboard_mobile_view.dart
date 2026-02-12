@@ -13,15 +13,16 @@ class DashboardMobileView extends StatelessWidget {
   Widget build(BuildContext context) {
     final padding = context.pagePadding;
     return SingleChildScrollView(
-      padding: EdgeInsets.all(padding),
+      padding: EdgeInsets.symmetric(horizontal: padding, vertical: 16.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildHeader(context),
-          SizedBox(height: 24.h),
+          SizedBox(height: 20.h),
           const DashboardStatsRow(),
-          SizedBox(height: 24.h),
+          SizedBox(height: 20.h),
           _buildQuickActions(context),
+          SizedBox(height: 24.h),
         ],
       ),
     );
@@ -34,17 +35,18 @@ class DashboardMobileView extends StatelessWidget {
         Text(
           'Dashboard',
           style: TextStyle(
-            fontSize: 26.sp,
+            fontSize: 24.sp,
             fontWeight: FontWeight.bold,
             color: ColorManager.textPrimary,
           ),
         ),
-        SizedBox(height: 8.h),
+        SizedBox(height: 6.h),
         Text(
           'Welcome back! Here\'s what\'s happening with your inventory.',
           style: TextStyle(
             fontSize: 14.sp,
             color: ColorManager.textSecondary,
+            height: 1.4,
           ),
         ),
       ],
@@ -54,7 +56,7 @@ class DashboardMobileView extends StatelessWidget {
   Widget _buildQuickActions(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(20.w),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: ColorManager.white,
         borderRadius: BorderRadius.circular(12.r),
@@ -73,18 +75,18 @@ class DashboardMobileView extends StatelessWidget {
           Text(
             'Quick actions',
             style: TextStyle(
-              fontSize: 18.sp,
+              fontSize: 17.sp,
               fontWeight: FontWeight.w600,
               color: ColorManager.textPrimary,
             ),
           ),
-          SizedBox(height: 16.h),
+          SizedBox(height: 14.h),
           QuickActionTile(
             iconPath: 'assets/icons/product_icon.svg',
             label: 'Products',
             onTap: () => context.go('/products'),
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: 10.h),
           QuickActionTile(
             iconPath: 'assets/icons/categories_icon.svg',
             label: 'Categories',

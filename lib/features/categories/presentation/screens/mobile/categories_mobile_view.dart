@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:task_dashboard/core/base/cubit/base_state.dart';
@@ -8,6 +9,7 @@ import 'package:task_dashboard/core/utils/responsive.dart';
 import 'package:task_dashboard/features/categories/presentation/cubit/categories_state.dart';
 import 'package:task_dashboard/features/categories/presentation/widgets/category_card.dart';
 import 'package:task_dashboard/features/categories/presentation/widgets/create_category_card.dart';
+import 'package:task_dashboard/features/products/presentation/cubit/products_cubit.dart';
 
 class CategoriesMobileView extends StatelessWidget {
   const CategoriesMobileView({
@@ -28,12 +30,12 @@ class CategoriesMobileView extends StatelessWidget {
     final categories = state.categories;
 
     return SingleChildScrollView(
-      padding: EdgeInsets.all(padding),
+      padding: EdgeInsets.symmetric(horizontal: padding, vertical: 16.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildHeader(context),
-          SizedBox(height: 24.h),
+          SizedBox(height: 20.h),
           if (isLoading) _buildLoading(),
           if (!isLoading && categories.isEmpty) _buildEmptyState(context),
           if (!isLoading && categories.isNotEmpty) _buildList(context, categories),
@@ -72,6 +74,7 @@ class CategoriesMobileView extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: ColorManager.mainColor,
               foregroundColor: ColorManager.white,
+              minimumSize: const Size(double.infinity, 48),
               padding: EdgeInsets.symmetric(vertical: 14.h),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8.r),
@@ -140,17 +143,21 @@ class CategoriesMobileView extends StatelessWidget {
   }
 
   Widget _buildList(BuildContext context, List<Category> categories) {
+    final products = context.watch<ProductsCubit>().state.products;
     return Column(
       children: [
         ...categories.map(
-          (category) => Padding(
-            key: ValueKey(category.id),
-            padding: EdgeInsets.only(bottom: 16.h),
-            child: CategoryCard(
-              imageUrl: category.imageUrl ?? '',
-              name: category.name,
-              description: category.description ?? '',
-              itemCount: category.itemCount,
+          (category) {
+            final productCount =
+                products.where((p) => p.categoryId == category.id).length;
+            return Padding(
+              key: ValueKey(category.id),
+              padding: EdgeInsets.only(bottom: 16.h),
+              child: CategoryCard(
+                imageUrl: category.imageUrl ?? '',
+                name: category.name,
+                description: category.description ?? '',
+                itemCount: productCount,
               lastUpdated: getTimeAgo(category.updatedAt),
               onEdit: () => context.go(
                 '/categories/edit/${category.id}',
@@ -162,9 +169,10 @@ class CategoriesMobileView extends StatelessWidget {
                 category.imageUrl,
               ),
             ),
-          ),
+          );
+          },
         ),
-        const CreateCategoryCard(key: ValueKey('create_category')),
+        // const CreateCategoryCard(key: ValueKey('create_category')),
       ],
     );
   }

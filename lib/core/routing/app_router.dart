@@ -30,8 +30,15 @@ class AppRouter {
             path: '/categories',
             name: 'categories',
             builder: (context, state) {
-              return BlocProvider(
-                create: (_) => getIt<CategoriesCubit>()..listenToCategories(),
+              return MultiBlocProvider(
+                providers: [
+                  BlocProvider(
+                    create: (_) => getIt<CategoriesCubit>()..listenToCategories(),
+                  ),
+                  BlocProvider(
+                    create: (_) => getIt<ProductsCubit>()..listenToProducts(),
+                  ),
+                ],
                 child: const CategoriesScreen(),
               );
             },

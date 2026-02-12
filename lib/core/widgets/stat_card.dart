@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:task_dashboard/core/theming/colors.dart';
+import 'package:task_dashboard/core/utils/responsive.dart';
 
 class StatCard extends StatelessWidget {
   final String title;
@@ -30,8 +31,10 @@ class StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = context.isMobile;
+    final padding = isMobile ? 14.w : 20.w;
     return Container(
-      padding: EdgeInsets.all(20.w),
+      padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
         color: ColorManager.white,
         borderRadius: BorderRadius.circular(12.r),
@@ -103,22 +106,26 @@ class StatCard extends StatelessWidget {
                 ),
             ],
           ),
-          SizedBox(height: 16.h),
+          SizedBox(height: isMobile ? 12.h : 16.h),
           Text(
             value,
             style: TextStyle(
-              fontSize: 28.sp,
+              fontSize: (isMobile ? 22 : 28).sp,
               fontWeight: FontWeight.bold,
               color: valueColor ?? ColorManager.black,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           SizedBox(height: 4.h),
           Text(
             title,
             style: TextStyle(
-              fontSize: 14.sp,
+              fontSize: (isMobile ? 12 : 14).sp,
               color: ColorManager.textSecondary,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           if (subtitle != null) ...[
             SizedBox(height: 4.h),
