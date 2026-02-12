@@ -7,8 +7,9 @@ import 'package:task_dashboard/core/models/category.dart';
 import 'package:task_dashboard/core/theming/colors.dart';
 import 'package:task_dashboard/core/utils/responsive.dart';
 import 'package:task_dashboard/features/categories/presentation/cubit/categories_state.dart';
+import 'package:task_dashboard/features/categories/presentation/widgets/categories_empty_state.dart';
+import 'package:task_dashboard/features/categories/presentation/widgets/categories_mobile_header.dart';
 import 'package:task_dashboard/features/categories/presentation/widgets/category_card.dart';
-import 'package:task_dashboard/features/categories/presentation/widgets/create_category_card.dart';
 import 'package:task_dashboard/features/products/presentation/cubit/products_cubit.dart';
 
 class CategoriesMobileView extends StatelessWidget {
@@ -34,55 +35,13 @@ class CategoriesMobileView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildHeader(context),
+          const CategoriesMobileHeader(),
           SizedBox(height: 20.h),
           if (isLoading) _buildLoading(),
-          if (!isLoading && categories.isEmpty) _buildEmptyState(context),
+          if (!isLoading && categories.isEmpty) const CategoriesEmptyState(),
           if (!isLoading && categories.isNotEmpty) _buildList(context, categories),
         ],
       ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Categories',
-          style: TextStyle(
-            fontSize: 26.sp,
-            fontWeight: FontWeight.bold,
-            color: ColorManager.textPrimary,
-          ),
-        ),
-        SizedBox(height: 4.h),
-        Text(
-          'Organize your products into catalog groups.',
-          style: TextStyle(
-            fontSize: 14.sp,
-            color: ColorManager.textSecondary,
-          ),
-        ),
-        SizedBox(height: 16.h),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton.icon(
-            onPressed: () => context.go('/categories/add'),
-            icon: const Icon(Icons.add),
-            label: const Text('Add Category'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: ColorManager.mainColor,
-              foregroundColor: ColorManager.white,
-              minimumSize: const Size(double.infinity, 48),
-              padding: EdgeInsets.symmetric(vertical: 14.h),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -92,51 +51,6 @@ class CategoriesMobileView extends StatelessWidget {
         padding: EdgeInsets.all(48.h),
         child: const CircularProgressIndicator(
           valueColor: AlwaysStoppedAnimation<Color>(ColorManager.mainColor),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEmptyState(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.all(48.h),
-        child: Column(
-          children: [
-            Icon(
-              Icons.category_outlined,
-              size: 64.sp,
-              color: ColorManager.textTertiary,
-            ),
-            SizedBox(height: 16.h),
-            Text(
-              'No categories yet',
-              style: TextStyle(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w600,
-                color: ColorManager.textPrimary,
-              ),
-            ),
-            SizedBox(height: 8.h),
-            Text(
-              'Create your first category to start organizing products',
-              style: TextStyle(
-                fontSize: 14.sp,
-                color: ColorManager.textSecondary,
-              ),
-            ),
-            SizedBox(height: 24.h),
-            ElevatedButton.icon(
-              onPressed: () => context.go('/categories/add'),
-              icon: const Icon(Icons.add),
-              label: const Text('Create Category'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: ColorManager.mainColor,
-                foregroundColor: ColorManager.white,
-                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 14.h),
-              ),
-            ),
-          ],
         ),
       ),
     );
@@ -172,7 +86,6 @@ class CategoriesMobileView extends StatelessWidget {
           );
           },
         ),
-        // const CreateCategoryCard(key: ValueKey('create_category')),
       ],
     );
   }

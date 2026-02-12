@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:task_dashboard/core/theming/colors.dart';
 import 'package:task_dashboard/core/utils/responsive.dart';
 import 'package:task_dashboard/core/widgets/app_snackbar.dart';
+import 'package:task_dashboard/features/layout/presentation/widgets/app_top_bar_search.dart';
 
 class AppTopBar extends StatelessWidget {
   final List<String> breadcrumbs;
@@ -88,50 +89,9 @@ class AppTopBar extends StatelessWidget {
               ),
             ),
           if (!isMobile) SizedBox(width: 12.w),
-          // Search – hidden on mobile (use in-screen search)
           if (!isMobile)
             Expanded(
-              child: Center(
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final showSearch = constraints.maxWidth > 200;
-                    if (!showSearch) return const SizedBox.shrink();
-                    return Container(
-                      height: 40.h,
-                      constraints: BoxConstraints(maxWidth: 320.w),
-                      child: TextField(
-                        onSubmitted: (value) {
-                          final q = value.trim();
-                          if (q.isEmpty) return;
-                          context.go('/products?q=${Uri.encodeComponent(q)}');
-                        },
-                        decoration: InputDecoration(
-                          hintText: 'Search products...',
-                          hintStyle: TextStyle(
-                            fontSize: 14.sp,
-                            color: ColorManager.textTertiary,
-                          ),
-                          prefixIcon: Icon(
-                            Icons.search,
-                            size: 20.sp,
-                            color: ColorManager.textTertiary,
-                          ),
-                          filled: true,
-                          fillColor: ColorManager.bgLight,
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 16.w,
-                            vertical: 10.h,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.r),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
+              child: Center(child: const AppTopBarSearch()),
             ),
           const Spacer(),
           // Action Buttons – ensure 48px touch targets

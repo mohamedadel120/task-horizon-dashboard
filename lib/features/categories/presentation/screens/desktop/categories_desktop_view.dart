@@ -7,6 +7,8 @@ import 'package:task_dashboard/core/models/category.dart';
 import 'package:task_dashboard/core/theming/colors.dart';
 import 'package:task_dashboard/core/utils/responsive.dart';
 import 'package:task_dashboard/features/categories/presentation/cubit/categories_state.dart';
+import 'package:task_dashboard/features/categories/presentation/widgets/categories_desktop_header.dart';
+import 'package:task_dashboard/features/categories/presentation/widgets/categories_empty_state.dart';
 import 'package:task_dashboard/features/categories/presentation/widgets/category_card.dart';
 import 'package:task_dashboard/features/categories/presentation/widgets/create_category_card.dart';
 import 'package:task_dashboard/features/products/presentation/cubit/products_cubit.dart';
@@ -34,55 +36,11 @@ class CategoriesDesktopView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildHeader(context),
+          const CategoriesDesktopHeader(),
           SizedBox(height: 24.h),
           _buildContent(context, isLoading, categories),
         ],
       ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Categories',
-                style: TextStyle(
-                  fontSize: 28.sp,
-                  fontWeight: FontWeight.bold,
-                  color: ColorManager.textPrimary,
-                ),
-              ),
-              SizedBox(height: 4.h),
-              Text(
-                'Organize your products into catalog groups.',
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  color: ColorManager.textSecondary,
-                ),
-              ),
-            ],
-          ),
-        ),
-        ElevatedButton.icon(
-          onPressed: () => context.go('/categories/add'),
-          icon: const Icon(Icons.add),
-          label: const Text('Add Category'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: ColorManager.mainColor,
-            foregroundColor: ColorManager.white,
-            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.r),
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -102,7 +60,7 @@ class CategoriesDesktopView extends StatelessWidget {
       );
     }
     if (categories.isEmpty) {
-      return _buildEmptyState(context);
+      return const CategoriesEmptyState();
     }
     return GridView.builder(
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -143,48 +101,4 @@ class CategoriesDesktopView extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.all(48.h),
-        child: Column(
-          children: [
-            Icon(
-              Icons.category_outlined,
-              size: 64.sp,
-              color: ColorManager.textTertiary,
-            ),
-            SizedBox(height: 16.h),
-            Text(
-              'No categories yet',
-              style: TextStyle(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w600,
-                color: ColorManager.textPrimary,
-              ),
-            ),
-            SizedBox(height: 8.h),
-            Text(
-              'Create your first category to start organizing products',
-              style: TextStyle(
-                fontSize: 14.sp,
-                color: ColorManager.textSecondary,
-              ),
-            ),
-            SizedBox(height: 24.h),
-            ElevatedButton.icon(
-              onPressed: () => context.go('/categories/add'),
-              icon: const Icon(Icons.add),
-              label: const Text('Create Category'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: ColorManager.mainColor,
-                foregroundColor: ColorManager.white,
-                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 14.h),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
